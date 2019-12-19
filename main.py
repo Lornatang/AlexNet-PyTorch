@@ -16,18 +16,23 @@ import argparse
 import os
 import random
 
-import time
+import torch
+import torchvision
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
 import torch.utils.data.dataloader
-import torchsummary.torchsummary as torchsummary
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
+from torch.hub import load_state_dict_from_url
 
 from model import AlexNet
 from utils.eval import accuracy
 from utils.misc import AverageMeter
+
+model_urls = {
+    'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
+}
 
 parser = argparse.ArgumentParser(description='PyTorch AlexNet Classifier')
 parser.add_argument('--dataroot', type=str,
@@ -41,12 +46,14 @@ parser.add_argument('--batch_size', type=int,
 parser.add_argument('--img_size', type=int, default=224,
                     help='the height / width of the inputs image to network')
 parser.add_argument('--lr', type=float, default=0.0001,
-                    help="starting lr, every 10 epoch decay 10.")
+                    help="learning rate.")
 parser.add_argument('--epochs', type=int, default=50, help="Train loop")
 parser.add_argument('--phase', type=str, default='eval',
                     help="train or eval? default:`eval`")
 parser.add_argument('--checkpoints_dir', default='./checkpoints',
                     help='folder to output model checkpoints')
+parser.add_argument('--pretrained', type=bool, default=False,
+                    help='If `True`, load pre trained model weights. Default: `False`.')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
 
 opt = parser.parse_args()
@@ -103,15 +110,20 @@ def train():
         os.makedirs(opt.checkpoints_dir)
     except OSError:
         pass
-
-    CNN = AlexNet(num_classes=120).to(device)
-    print(CNN)
+    if torch.cuda.device_count() > 1:
+      model = torch.nn.parallel.DataParallel(AlexNet(**kwargs))
+    else:
+      model = AlexNet(num_classes=opt.num_classes)
+    if pretrained:
+      state_dict = load_state_dict_from_url(model_urls['alexnet'],
+                                            progress=progress)
+      model.load_state_dict(state_dict)
 
     ################################################
-    # Set loss function and Adam optimier
+    # Set loss function and Adam optimizer
     ################################################
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = optim.Adam(CNN.parameters(), lr=opt.lr)
+    optimizer = optim.Adam(model.parameters(), lr=opt.lr)
 
     for epoch in range(opt.epochs):
         # train for one epoch
@@ -129,7 +141,7 @@ def train():
             targets = targets.to(device)
 
             # compute output
-            output = CNN(inputs)
+            output = model(inputs)
             loss = criterion(output, targets)
 
             # measure accuracy and record loss
@@ -175,8 +187,8 @@ def test():
             total += targets.size(0)
             correct += (predicted == targets).sum().item()
 
-    accuracy = 100 * correct / total
-    return accuracy
+    acc = 100 * correct / total
+    return acc
 
 
 if __name__ == '__main__':
