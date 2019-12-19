@@ -173,8 +173,9 @@ def test():
   model.to(device)
 
   # init value
-  total = 0.
-  correct = 0.
+  correct1 = 0.
+  correct5 = 0.
+  total = len(test_dataloader.dataset)
   with torch.no_grad():
     for i, data in enumerate(test_dataloader):
       # get the inputs; data is a list of [inputs, labels]
@@ -182,13 +183,19 @@ def test():
       inputs = inputs.to(device)
       targets = targets.to(device)
 
-      outputs = CNN(inputs)
-      _, predicted = torch.max(outputs.data, 1)
-      total += targets.size(0)
-      correct += (predicted == targets).sum().item()
+      outputs = model(inputs)
 
-  acc = 100 * correct / total
-  return acc
+      # cal top 1 accuracy
+      prec1 = outputs.argmax(dim=1)
+      correct1 += torch.eq(prec1, targets).sum().item()
+
+      # cal top 5 accuracy
+      maxk = torch.max((1, 2))
+      targets_resize = targets.view(-1, 1)
+      _, prec5 = outputs.topk(maxk, 1, True, True)
+      correct5 += torch.eq(prec5, targets_resize).sum().item()
+
+  return correct1 / total, correct5 / total
 
 
 if __name__ == '__main__':
@@ -199,6 +206,7 @@ if __name__ == '__main__':
     train()
   elif opt.phase == "eval":
     print("Loading model successful!")
-    accuracy = test()
+    top1, top5 = test()
     print(
-      f"\nAccuracy of the network on the test images: {accuracy:.2f}%.\n")
+      f"Top 1 accuracy of the network on the test images: {top1:.6f}.\n
+      f"Top 5 accuracy of the network on the test images: {top5:.6f}.\n)
