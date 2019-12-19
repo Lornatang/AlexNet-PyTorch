@@ -35,7 +35,7 @@ parser.add_argument('--dataroot', type=str,
 parser.add_argument('--name', type=str, default="fruits",
                     help="Dataset name. Default: fruits.")
 parser.add_argument('--workers', type=int,
-                    help='number of data loading workers', default=4)
+                    help='number of data loading workers', default=2)
 parser.add_argument('--batch_size', type=int,
                     default=128, help='inputs batch size')
 parser.add_argument('--img_size', type=int, default=224,
@@ -70,22 +70,25 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # train datasets path
 TRAIN_DATASETS_PATH = os.path.join(opt.dataroot, f"{opt.name}/train")
 # test datasets path
-TEST_DATASETS_PATH = os.path.join(opt.dataroot, f"{opt.name}/test")
+TEST_DATASETS_PATH = os.path.join(opt.dataroot, f"{opt.name}/valid")
 
 # model path
 MODEL_PATH = os.path.join(opt.checkpoints_dir, f"{opt.name}.pth")
 
 train_dataset = dset.ImageFolder(root=TRAIN_DATASETS_PATH,
                                  transform=transforms.Compose([
-                                   transforms.Resize((256, 256), interpolation=3),
-                                   transforms.RandomResizedCrop(opt.img_size),
+                                   transforms.RandomResizedCrop(size=256, scale=(0.8, 1.0)),
+                                   transforms.RandomRotation(degrees=15),
+                                   transforms.ColorJitter(),
                                    transforms.RandomHorizontalFlip(),
+                                   transforms.CenterCrop(size=opt.img_size),
                                    transforms.ToTensor(),
                                    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
                                  ]))
 test_dataset = dset.ImageFolder(root=TEST_DATASETS_PATH,
                                 transform=transforms.Compose([
-                                  transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
+                                  transforms.Resize((256, 256), interpolation=3),
+                                  transforms.CenterCrop(size=opt.img_size),
                                   transforms.ToTensor(),
                                   transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
                                 ]))
