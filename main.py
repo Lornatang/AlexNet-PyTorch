@@ -24,15 +24,10 @@ import torch.utils.data
 import torch.utils.data.dataloader
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
-from torch.hub import load_state_dict_from_url
 
 from model import AlexNet
 from utils.eval import accuracy
 from utils.misc import AverageMeter
-
-model_urls = {
-  'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
-}
 
 parser = argparse.ArgumentParser(description='PyTorch AlexNet Classifier')
 parser.add_argument('--dataroot', type=str,
@@ -49,7 +44,7 @@ parser.add_argument('--num_classes', type=int, default=1000,
                     help="number of dataset category.")
 parser.add_argument('--lr', type=float, default=0.0001,
                     help="learning rate.")
-parser.add_argument('--epochs', type=int, default=50, help="Train loop")
+parser.add_argument('--epochs', type=int, default=500, help="Train loop")
 parser.add_argument('--phase', type=str, default='eval',
                     help="train or eval? default:`eval`")
 parser.add_argument('--checkpoints_dir', default='./checkpoints',
@@ -111,6 +106,8 @@ def train():
     model = torch.nn.parallel.DataParallel(AlexNet(num_classes=opt.num_classes))
   else:
     model = AlexNet(num_classes=opt.num_classes)
+  if os.path.exists(MODEL_PATH):
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=lambda storage, loc: storage))
   model.to(device)
   ################################################
   # Set loss function and Adam optimizer
