@@ -54,8 +54,6 @@ parser.add_argument('--phase', type=str, default='eval',
                     help="train or eval? default:`eval`")
 parser.add_argument('--checkpoints_dir', default='./checkpoints',
                     help='folder to output model checkpoints')
-parser.add_argument('--pretrained', type=bool, default=False,
-                    help='If `True`, load pre trained model weights. Default: `False`.')
 parser.add_argument('--manualSeed', type=int, help='manual seed')
 
 opt = parser.parse_args()
@@ -113,9 +111,6 @@ def train():
     model = torch.nn.parallel.DataParallel(AlexNet(num_classes=opt.num_classes))
   else:
     model = AlexNet(num_classes=opt.num_classes)
-  if opt.pretrained:
-    state_dict = load_state_dict_from_url(model_urls['alexnet'])
-    model.load_state_dict(state_dict)
   model.to(device)
   ################################################
   # Set loss function and Adam optimizer
