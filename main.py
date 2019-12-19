@@ -190,7 +190,7 @@ def test():
       correct1 += torch.eq(prec1, targets).sum().item()
 
       # cal top 5 accuracy
-      maxk = torch.max((1, 2))
+      maxk = max((1, 2))
       targets_resize = targets.view(-1, 1)
       _, prec5 = outputs.topk(maxk, 1, True, True)
       correct5 += torch.eq(prec5, targets_resize).sum().item()
