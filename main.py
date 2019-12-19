@@ -35,14 +35,14 @@ parser.add_argument('--dataroot', type=str,
 parser.add_argument('--name', type=str, default="fruits",
                     help="Dataset name. Default: fruits.")
 parser.add_argument('--workers', type=int,
-                    help='number of data loading workers', default=2)
+                    help='number of data loading workers', default=1)
 parser.add_argument('--batch_size', type=int,
                     default=128, help='inputs batch size')
 parser.add_argument('--img_size', type=int, default=224,
                     help='the height / width of the inputs image to network')
 parser.add_argument('--num_classes', type=int, default=1000,
                     help="number of dataset category.")
-parser.add_argument('--lr', type=float, default=0.0001,
+parser.add_argument('--lr', type=float, default=0.00001,
                     help="learning rate.")
 parser.add_argument('--epochs', type=int, default=500, help="Train loop")
 parser.add_argument('--phase', type=str, default='eval',
@@ -70,7 +70,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # train datasets path
 TRAIN_DATASETS_PATH = os.path.join(opt.dataroot, f"{opt.name}/train")
 # test datasets path
-TEST_DATASETS_PATH = os.path.join(opt.dataroot, f"{opt.name}/valid")
+TEST_DATASETS_PATH = os.path.join(opt.dataroot, f"{opt.name}/test")
 
 # model path
 MODEL_PATH = os.path.join(opt.checkpoints_dir, f"{opt.name}.pth")
@@ -138,7 +138,7 @@ def train():
       loss = criterion(output, targets)
 
       # measure accuracy and record loss
-      prec1, prec5 = accuracy(output, targets, topk=(1, 2))
+      prec1, prec5 = accuracy(output, targets, topk=(1, 5))
       losses.update(loss.item(), inputs.size(0))
       top1.update(prec1, inputs.size(0))
       top5.update(prec5, inputs.size(0))
@@ -185,7 +185,7 @@ def test():
       correct1 += torch.eq(prec1, targets).sum().item()
 
       # cal top 5 accuracy
-      maxk = max((1, 2))
+      maxk = max((1, 5))
       targets_resize = targets.view(-1, 1)
       _, prec5 = outputs.topk(maxk, 1, True, True)
       correct5 += torch.eq(prec5, targets_resize).sum().item()
