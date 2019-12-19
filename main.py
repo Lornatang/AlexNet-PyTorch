@@ -114,7 +114,7 @@ def train():
   else:
     model = AlexNet(num_classes=opt.num_classes)
   if opt.pretrained:
-    state_dict = load_state_dict_from_url(model_urls['alexnet'], progress=progress)
+    state_dict = load_state_dict_from_url(model_urls['alexnet'])
     model.load_state_dict(state_dict)
   model.to(device)
   ################################################
@@ -161,7 +161,7 @@ def train():
             f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})", end="\r")
 
     # save model file
-    torch.save(CNN.state_dict(), MODEL_PATH)
+    torch.save(model.state_dict(), MODEL_PATH)
 
 
 def test():
@@ -208,5 +208,5 @@ if __name__ == '__main__':
     print("Loading model successful!")
     top1, top5 = test()
     print(
-      f"Top 1 accuracy of the network on the test images: {top1:.6f}.\n
-      f"Top 5 accuracy of the network on the test images: {top5:.6f}.\n)
+      f"Top 1 accuracy of the network on the test images: {top1:.6f}.\n"
+      f"Top 5 accuracy of the network on the test images: {top5:.6f}.\n")
