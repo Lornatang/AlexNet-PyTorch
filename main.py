@@ -42,7 +42,7 @@ parser.add_argument('--img_size', type=int, default=224,
                     help='the height / width of the inputs image to network')
 parser.add_argument('--num_classes', type=int, default=1000,
                     help="number of dataset category.")
-parser.add_argument('--lr', type=float, default=0.00001,
+parser.add_argument('--lr', type=float, default=0.0001,
                     help="learning rate.")
 parser.add_argument('--epochs', type=int, default=500, help="Train loop")
 parser.add_argument('--phase', type=str, default='eval',
@@ -78,17 +78,14 @@ MODEL_PATH = os.path.join(opt.checkpoints_dir, f"{opt.name}.pth")
 train_dataset = dset.ImageFolder(root=TRAIN_DATASETS_PATH,
                                  transform=transforms.Compose([
                                    transforms.RandomResizedCrop(size=256, scale=(0.8, 1.0)),
-                                   transforms.RandomRotation(degrees=15),
-                                   transforms.ColorJitter(),
-                                   transforms.RandomHorizontalFlip(),
                                    transforms.CenterCrop(size=opt.img_size),
+                                   transforms.RandomHorizontalFlip(),
                                    transforms.ToTensor(),
                                    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
                                  ]))
 test_dataset = dset.ImageFolder(root=TEST_DATASETS_PATH,
                                 transform=transforms.Compose([
-                                  transforms.Resize((256, 256), interpolation=3),
-                                  transforms.CenterCrop(size=opt.img_size),
+                                  transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
                                   transforms.ToTensor(),
                                   transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
                                 ]))
