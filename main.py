@@ -78,7 +78,9 @@ MODEL_PATH = os.path.join(opt.checkpoints_dir, f"{opt.name}.pth")
 train_dataset = dset.ImageFolder(root=TRAIN_DATASETS_PATH,
                                  transform=transforms.Compose([
                                    transforms.RandomResizedCrop(size=256, scale=(0.8, 1.0)),
-                                   transforms.CenterCrop(size=opt.img_size),
+                                   transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
+                                   transforms.RandomRotation(degrees=15),
+                                   transforms.ColorJitter(),
                                    transforms.RandomHorizontalFlip(),
                                    transforms.ToTensor(),
                                    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
@@ -113,7 +115,7 @@ def train():
   # Set loss function and Adam optimizer
   ################################################
   criterion = torch.nn.CrossEntropyLoss()
-  optimizer = optim.Adam(model.parameters(), lr=opt.lr)
+  optimizer = optim.Adam(model.parameters(), lr=opt.lr, weight_decay=1e-5)
 
   for epoch in range(opt.epochs):
     # train for one epoch
