@@ -84,16 +84,16 @@ def train():
     pass
 
   train_dataset = dset.ImageFolder(root=TRAIN_DATASETS_PATH,
-                                 transform=transforms.Compose([
-                                   transforms.RandomResizedCrop(size=256, scale=(0.8, 1.0)),
-                                   transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
-                                   transforms.RandomHorizontalFlip(),
-                                   transforms.ToTensor(),
-                                   transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-                                 ]))
+                                   transform=transforms.Compose([
+                                     transforms.RandomResizedCrop(size=256, scale=(0.8, 1.0)),
+                                     transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
+                                     transforms.RandomHorizontalFlip(),
+                                     transforms.ToTensor(),
+                                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                                   ]))
   train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size,
-                                                pin_memory=torch.cuda.is_available(),
-                                                shuffle=True, num_workers=int(opt.workers))
+                                                 pin_memory=torch.cuda.is_available(),
+                                                 shuffle=True, num_workers=int(opt.workers))
 
   if torch.cuda.device_count() > 1:
     model = torch.nn.parallel.DataParallel(AlexNet(num_classes=opt.num_classes))
@@ -153,15 +153,14 @@ def train():
 
 def test():
   test_dataset = dset.ImageFolder(root=TEST_DATASETS_PATH,
-                                transform=transforms.Compose([
-                                  transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
-                                  transforms.RandomHorizontalFlip(),
-                                  transforms.ToTensor(),
-                                  transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-                                ]))
+                                  transform=transforms.Compose([
+                                    transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
+                                    transforms.ToTensor(),
+                                    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                                  ]))
   test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=opt.batch_size,
-                                              pin_memory=torch.cuda.is_available(),
-                                              shuffle=False, num_workers=int(opt.workers))
+                                                pin_memory=torch.cuda.is_available(),
+                                                shuffle=False, num_workers=int(opt.workers))
 
   if torch.cuda.device_count() > 1:
     model = torch.nn.parallel.DataParallel(AlexNet(num_classes=opt.num_classes))
@@ -204,7 +203,7 @@ if __name__ == '__main__':
     train()
   elif opt.phase == "eval":
     print("Loading model successful!")
-    top1, top5 = test()
+    acc1, acc5 = test()
     print(
-      f"Top 1 accuracy of the network on the test images: {top1:.6f}.\n"
-      f"Top 5 accuracy of the network on the test images: {top5:.6f}.\n")
+      f"Top 1 accuracy of the network on the test images: {acc1:.6f}.\n"
+      f"Top 5 accuracy of the network on the test images: {acc5:.6f}.\n")
