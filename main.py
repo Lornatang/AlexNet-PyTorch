@@ -43,8 +43,8 @@ parser.add_argument('--img_size', type=int, default=224,
                     help='the height / width of the inputs image to network')
 parser.add_argument('--num_classes', type=int, default=1000,
                     help="number of dataset category.")
-parser.add_argument('--lr', type=float, default=0.01,
-                    help="learning rate. Default: 0.01. For use adjust learning rate.")
+parser.add_argument('--lr', type=float, default=0.001,
+                    help="learning rate. Default: 0.001. For use adjust learning rate.")
 parser.add_argument('--epochs', type=int, default=500, help="Train loop")
 parser.add_argument('--phase', type=str, default='eval',
                     help="train or eval? default:`eval`")
@@ -85,7 +85,6 @@ def train():
 
   train_dataset = dset.ImageFolder(root=TRAIN_DATASETS_PATH,
                                    transform=transforms.Compose([
-                                     transforms.RandomResizedCrop(size=256, scale=(0.8, 1.0)),
                                      transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
                                      transforms.RandomHorizontalFlip(),
                                      transforms.ToTensor(),
