@@ -1,83 +1,67 @@
-## Deep Convolution Generative Adversarial Networks
+# Deep Convolution Generative Adversarial Networks
 
-### Introduction
+### Overview
+This repository contains an op-for-op PyTorch reimplementation of [AlexNet](http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf).
 
-This example implements the paper [Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks](http://arxiv.org/abs/1511.06434)
+The goal of this implementation is to be simple, highly extensible, and easy to integrate into your own projects. This implementation is a work in progress -- new features are currently being implemented.  
 
-The implementation is very close to the Torch implementation [main.py](https://github.com/Lornatang/PyTorch-DCGAN/main.py)
+At the moment, you can easily:  
+ * Load pretrained AlexNet models 
+ * Use AlexNet models for classification or feature extraction 
 
-After every 100 training iterations, the files `real_samples.png` and `fake_samples.png` are written to disk
-with the samples from the generative model.
+_Upcoming features_: In the next few days, you will be able to:
+ * Quickly finetune an AlexNet on your own dataset
+ * Export EfficientNet models for production
+ 
+ ### Table of contents
+1. [About AlexNet](#about-alexnet)
+2. [Usage](#usage)
+    * [Load models](#loading-models)
+    * [train models](#train)
+    * [eval models](#eval)
+3. [Contributing](#contributing) 
 
-After every epoch, models are saved to: `netG_epoch_%d.pth` and `netD_epoch_%d.pth`
+### About AlexNet
 
-#### Configure
+If you're new to AlexNets, here is an explanation straight from the official PyTorch implementation: 
 
-- [PyTorch](https://pytorch.org) > 1.3.0
-- GTX 1080 Ti
+Current approaches to object recognition make essential use of machine learning methods. To improve their performance, we can collect larger datasets, learn more powerful models, and use better techniques for preventing overfitting. Until recently, datasets of labeled images were relatively
+small — on the order of tens of thousands of images (e.g., NORB [16], Caltech-101/256 [8, 9], and
+CIFAR-10/100 [12]). Simple recognition tasks can be solved quite well with datasets of this size,
+especially if they are augmented with label-preserving transformations. For example, the currentbest error rate on the MNIST digit-recognition task (<0.3%) approaches human performance [4].
+But objects in realistic settings exhibit considerable variability, so to learn to recognize them it is
+necessary to use much larger training sets. And indeed, the shortcomings of small image datasets
+have been widely recognized (e.g., Pinto et al. [21]), but it has only recently become possible to collect labeled datasets with millions of images. The new larger datasets include LabelMe [23], which
+consists of hundreds of thousands of fully-segmented images, and ImageNet [6], which consists of
+over 15 million labeled high-resolution images in over 22,000 categories. 
 
-### Load dataset
+### Usage
 
-- [baidu netdisk](https://pan.baidu.com/s/1eSifHcA) password：`g5qa`
-
-**download data put on ./datasets folder.**
-
-Thanks [何之源](https://www.zhihu.com/people/he-zhi-yuan-16)
-
-```text
-datasets/
-└── faces/
-    ├── 0000fdee4208b8b7e12074c920bc6166-0.jpg
-    ├── 0001a0fca4e9d2193afea712421693be-0.jpg
-    ├── 0001d9ed32d932d298e1ff9cc5b7a2ab-0.jpg
-    ├── 0001d9ed32d932d298e1ff9cc5b7a2ab-1.jpg
-    ├── 00028d3882ec183e0f55ff29827527d3-0.jpg
-    ├── 00028d3882ec183e0f55ff29827527d3-1.jpg
-    ├── 000333906d04217408bb0d501f298448-0.jpg
-    ├── 0005027ac1dcc32835a37be806f226cb-0.jpg
-```
-
-#### Purpose
-
-Use a stable DCGAN structure to generate avatar images of anime girls.
-
-#### Usage
-
-- train
-
-if you want pretrain generate model, 
-click it **[netg_200.pth](http://pytorch-1252820389.cosbj.myqcloud.com/netg_200.pth)**
-
-if you want pretrain discriminate model, 
-click it **[netd_200.pth](http://pytorch-1252820389.cosbj.myqcloud.com/netd_200.pth)**
-
-please rename model name. `netd_200.pth` -> `D.pth` and `netg_200.pth` -> `G.pth`
-
-start run:
-```text
-python main.py
-```
-
-- test
+#### Loading models
 
 ```text
-python main.py --phase generate
+if torch.cuda.device_count() > 1:
+model = torch.nn.parallel.DataParallel(AlexNet(num_classes=opt.num_classes))
+else:
+model = AlexNet(num_classes=opt.num_classes)
+if os.path.exists(MODEL_PATH):
+model.load_state_dict(torch.load(MODEL_PATH, map_location=lambda storage, loc: storage))
 ```
 
-#### Example
+#### train
 
-- epoch 1
+```text
+python3 main --name <DATA_DIR> --num_classes <DATASETS_CLASSES> --phase train
+```
 
-![epoch1.png](https://github.com/Lornatang/PyTorch-DCGAN/blob/master/assets/epoch1.png)
+#### eval
 
-- epoch 30
+```text
+python3 main --name <DATA_DIR> --num_classes <DATASETS_CLASSES>
+```
 
-![epoch30.png](https://github.com/Lornatang/PyTorch-DCGAN/blob/master/assets/epoch30.png)
+### Contributing
 
-- epoch 100
+If you find a bug, create a GitHub issue, or even better, submit a pull request. Similarly, if you have questions, simply post them as GitHub issues.   
 
-![epoch100.png](https://github.com/Lornatang/PyTorch-DCGAN/blob/master/assets/epoch100.png)
-
-- epoch 200
-
-![epoch200.png](https://github.com/Lornatang/PyTorch-DCGAN/blob/master/assets/epoch200.png)
+I look forward to seeing what the community does with these models! 
