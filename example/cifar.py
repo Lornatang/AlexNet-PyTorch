@@ -18,6 +18,7 @@ import random
 
 import torch
 import torchvision
+import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
@@ -25,14 +26,11 @@ import torch.utils.data.dataloader
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 
-from utils.eval import accuracy
-from utils.misc import AverageMeter
-
 parser = argparse.ArgumentParser(description='PyTorch AlexNet Classifier')
 parser.add_argument('--dataroot', type=str,
                     default="../datasets/cifar", help="dataset path.")
-parser.add_argument('--name', type=str, default="cifar10",
-                    help="Dataset name. Default: cifar10.")
+parser.add_argument('--name', type=str, default="cifar-10",
+                    help="Dataset name. Default: cifar-10.")
 parser.add_argument('--workers', type=int,
                     help='number of data loading workers', default=1)
 parser.add_argument('--batch_size', type=int,
@@ -69,56 +67,41 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # model path
 MODEL_PATH = os.path.join(opt.checkpoints_dir, f"{opt.name}.pth")
 
-if opt.name == "cifar10":
-  train_dataset = dset.CIFAR10(root=opt.dataroot,
-                               download=True,
-                               train=True,
-                               transform=transforms.Compose([
-                                 transforms.RandomRotation(degrees=15),
-                                 transforms.ColorJitter(),
-                                 transforms.RandomHorizontalFlip(),
-                                 transforms.ToTensor(),
-                                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-                               ]))
-  test_dataset = dset.CIFAR10(root=dataroot,
-                              download=True,
-                              train=False,
-                              transform=transforms.Compose([
-                                transforms.ToTensor(),
-                                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-                              ]))
-  train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size,
-                                                 shuffle=True, num_workers=int(opt.workers))
+data_name = str(opt.name)
 
-  test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=opt.batch_size,
-                                                shuffle=False, num_workers=int(opt.workers))
+class AverageMeter(object):
+  """Computes and stores the average and current value"""
 
-elif opt.name == "cifar100":
-  train_dataset = dset.CIFAR100(root=opt.dataroot,
-                                download=True,
-                                train=True,
-                                transform=transforms.Compose([
-                                  transforms.RandomRotation(degrees=15),
-                                  transforms.ColorJitter(),
-                                  transforms.RandomHorizontalFlip(),
-                                  transforms.ToTensor(),
-                                  transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-                                ]))
-  test_dataset = dset.CIFAR100(root=dataroot,
-                               download=True,
-                               train=False,
-                               transform=transforms.Compose([
-                                 transforms.ToTensor(),
-                                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-                               ]))
-  train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size,
-                                                 shuffle=True, num_workers=int(opt.workers))
+  def __init__(self):
+    self.reset()
 
-  test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=opt.batch_size,
-                                                shuffle=False, num_workers=int(opt.workers))
-else:
-  print(parser.print_help())
-  exit(0)
+  def reset(self):
+    self.val = 0
+    self.avg = 0
+    self.sum = 0
+    self.count = 0
+
+  def update(self, val, n=1):
+    self.val = val
+    self.sum += val * n
+    self.count += n
+    self.avg = self.sum / self.count
+
+
+def accuracy(output, target, topk=(1,)):
+  """Computes the precision@k for the specified values of k"""
+  maxk = max(topk)
+  batch_size = target.size(0)
+
+  _, pred = output.topk(maxk, 1, True, True)
+  pred = pred.t()
+  correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+  res = []
+  for k in topk:
+    correct_k = correct[:k].view(-1).float().sum(0)
+    res.append(correct_k.mul_(100.0 / batch_size))
+  return res
 
 
 class AlexNet(nn.Module):
@@ -164,6 +147,38 @@ def train():
     os.makedirs(opt.checkpoints_dir)
   except OSError:
     pass
+
+  if opt.name == "cifar-10":
+    train_dataset = dset.CIFAR10(root=opt.dataroot,
+                               download=True,
+                               train=True,
+                               transform=transforms.Compose([
+                                 transforms.RandomHorizontalFlip(),
+                                 transforms.ToTensor(),
+                                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                               ]))
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size,
+                                                 pin_memory=torch.cuda.is_available(),
+                                                 shuffle=True, num_workers=int(opt.workers))
+    opt.num_classes = 10
+  elif opt.name == "cifar-100":
+    train_dataset = dset.CIFAR100(root=opt.dataroot,
+                                download=True,
+                                train=True,
+                                transform=transforms.Compose([
+                                  transforms.RandomHorizontalFlip(),
+                                  transforms.ToTensor(),
+                                  transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                                ]))
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size,
+                                                 pin_memory=torch.cuda.is_available(),
+                                                 shuffle=True, num_workers=int(opt.workers))
+    opt.num_classes = 100
+  else:
+    print(parser.print_help())
+    exit(0)
+
+
   if torch.cuda.device_count() > 1:
     model = torch.nn.parallel.DataParallel(AlexNet(num_classes=opt.num_classes))
   else:
@@ -219,6 +234,35 @@ def train():
 
 
 def test():
+
+  if opt.name == "cifar-10":
+    test_dataset = dset.CIFAR10(root=opt.dataroot,
+                               download=True,
+                               train=False,
+                               transform=transforms.Compose([
+                                 transforms.ToTensor(),
+                                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                               ]))
+    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=opt.batch_size,
+                                                 pin_memory=torch.cuda.is_available(),
+                                                 shuffle=True, num_workers=int(opt.workers))
+    opt.num_classes = 10
+  elif opt.name == "cifar-100":
+    test_dataset = dset.CIFAR100(root=opt.dataroot,
+                                download=True,
+                                train=False,
+                                transform=transforms.Compose([
+                                  transforms.ToTensor(),
+                                  transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                                ]))
+    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=opt.batch_size, 
+                                                 pin_memory=torch.cuda.is_available(),
+                                                 shuffle=True, num_workers=int(opt.workers))
+    opt.num_classes = 100
+  else:
+    print(parser.print_help())
+    exit(0)
+
   if torch.cuda.device_count() > 1:
     model = torch.nn.parallel.DataParallel(AlexNet(num_classes=opt.num_classes))
   else:
