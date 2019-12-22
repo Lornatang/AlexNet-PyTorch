@@ -84,12 +84,13 @@ def train():
     pass
 
   train_dataset = dset.ImageFolder(root=TRAIN_DATASETS_PATH,
-                                   transform=transforms.Compose([
-                                     transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
-                                     transforms.RandomHorizontalFlip(),
-                                     transforms.ToTensor(),
-                                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-                                   ]))
+                                    transform=transforms.Compose([
+                                    transforms.RandomResizedCrop(256, scale=(0.8, 1.0)),
+                                    transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
+                                    transforms.RandomHorizontalFlip(),
+                                    transforms.ToTensor(),
+                                    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                                  ]))
   train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=opt.batch_size,
                                                  pin_memory=torch.cuda.is_available(),
                                                  shuffle=True, num_workers=int(opt.workers))
@@ -159,7 +160,7 @@ def test():
                                   ]))
   test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=opt.batch_size,
                                                 pin_memory=torch.cuda.is_available(),
-                                                shuffle=False, num_workers=int(opt.workers))
+                                                num_workers=int(opt.workers))
 
   if torch.cuda.device_count() > 1:
     model = torch.nn.parallel.DataParallel(AlexNet(num_classes=opt.num_classes))
