@@ -1,4 +1,4 @@
-# Deep Convolution Generative Adversarial Networks
+# AlexNet-PyTorch
 
 ### Overview
 This repository contains an op-for-op PyTorch reimplementation of [AlexNet](http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf).
