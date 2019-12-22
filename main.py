@@ -45,7 +45,7 @@ parser.add_argument('--num_classes', type=int, default=1000,
                     help="number of dataset category.")
 parser.add_argument('--lr', type=float, default=0.001,
                     help="learning rate. Default: 0.001. For use adjust learning rate.")
-parser.add_argument('--epochs', type=int, default=500, help="Train loop")
+parser.add_argument('--epochs', type=int, default=2000, help="Train loop")
 parser.add_argument('--phase', type=str, default='eval',
                     help="train or eval? default:`eval`")
 parser.add_argument('--checkpoints_dir', default='./checkpoints',
