@@ -109,7 +109,7 @@ class AlexNet(nn.Module):
      One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
   """
 
-  def __init__(self, num_classes=opt.num_classes):
+  def __init__(self, num_classes=1000):
     super(AlexNet, self).__init__()
     self.features = nn.Sequential(
       nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1),
@@ -245,7 +245,7 @@ def test():
                                ]))
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=opt.batch_size,
                                                  pin_memory=torch.cuda.is_available(),
-                                                 shuffle=True, num_workers=int(opt.workers))
+                                                 num_workers=int(opt.workers))
     opt.num_classes = 10
   elif opt.name == "cifar-100":
     test_dataset = dset.CIFAR100(root=opt.dataroot,
@@ -257,7 +257,7 @@ def test():
                                 ]))
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=opt.batch_size, 
                                                  pin_memory=torch.cuda.is_available(),
-                                                 shuffle=True, num_workers=int(opt.workers))
+                                                 num_workers=int(opt.workers))
     opt.num_classes = 100
   else:
     print(parser.print_help())
