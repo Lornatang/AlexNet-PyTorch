@@ -35,6 +35,13 @@ have been widely recognized (e.g., Pinto et al. [21]), but it has only recently 
 consists of hundreds of thousands of fully-segmented images, and ImageNet [6], which consists of
 over 15 million labeled high-resolution images in over 22,000 categories. 
 
+- **Resolution**
+
+|     Datasets     |  Top1  |  Top5  | DataArgumentation |
+|:----------------:|:------:|:------:|:-----------------:|
+|CIFAR-10          | 71.24% | 97.05% |         √         |
+|CIFAR-100         | 71.24% | 97.05% |         √         |
+
 ### Usage
 
 #### Loading models
