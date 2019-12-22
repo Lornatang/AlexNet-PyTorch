@@ -40,7 +40,6 @@ over 15 million labeled high-resolution images in over 22,000 categories.
 |     Datasets     |  Top1  |  Top5  | DataArgumentation |
 |:----------------:|:------:|:------:|:-----------------:|
 |CIFAR-10          | 71.24% | 97.05% |         √         |
-|CIFAR-100         | 71.24% | 97.05% |         √         |
 
 ### Usage
 
