@@ -124,10 +124,12 @@ class AlexNet(nn.Module):
       nn.ReLU(inplace=True),
       nn.Conv2d(256, 256, kernel_size=3, padding=1),
       nn.ReLU(inplace=True),
+      nn.MaxPool2d(kernel_size=3, stride=2),
     )
+    self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
     self.classifier = nn.Sequential(
       nn.Dropout(),
-      nn.Linear(256 * 3 * 3, 4096),
+      nn.Linear(256 * 6 * 6, 4096),
       nn.ReLU(inplace=True),
       nn.Dropout(),
       nn.Linear(4096, 4096),
@@ -137,6 +139,7 @@ class AlexNet(nn.Module):
 
   def forward(self, x):
     x = self.features(x)
+    x = self.avgpool(x)
     x = torch.flatten(x, 1)
     x = self.classifier(x)
     return x
@@ -153,6 +156,9 @@ def train():
                                download=True,
                                train=True,
                                transform=transforms.Compose([
+                                 transforms.RandomResizedCrop(40),
+                                 transforms.Resize(opt.img_size),
+                                 transforms.ColorJitter(),
                                  transforms.RandomHorizontalFlip(),
                                  transforms.ToTensor(),
                                  transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
@@ -166,6 +172,9 @@ def train():
                                 download=True,
                                 train=True,
                                 transform=transforms.Compose([
+                                  transforms.RandomResizedCrop(40),
+                                  transforms.Resize(opt.img_size),
+                                  transforms.ColorJitter(),
                                   transforms.RandomHorizontalFlip(),
                                   transforms.ToTensor(),
                                   transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
@@ -223,11 +232,12 @@ def train():
 
       # Call step of optimizer to update model params
       optimizer.step()
-
-      print(f"Epoch [{epoch + 1}] [{i + 1}/{len(train_dataloader)}]\t"
-            f"Loss {loss.item():.4f}\t"
-            f"Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t"
-            f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})", end="\r")
+      
+      if i % 50 == 0:
+        print(f"Epoch [{epoch}] [{i}/{len(train_dataloader)}]\t"
+              f"Loss {loss.item():.4f}\t"
+              f"Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t"
+              f"Prec@5 {top5.val:.3f} ({top5.avg:.3f})")
 
     # save model file
     torch.save(model.state_dict(), MODEL_PATH)
