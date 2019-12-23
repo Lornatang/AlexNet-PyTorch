@@ -39,9 +39,9 @@ parser.add_argument('--img_size', type=int, default=32,
                     help='the height / width of the inputs image to network')
 parser.add_argument('--num_classes', type=int, default=10,
                     help="number of dataset category.")
-parser.add_argument('--lr', type=float, default=0.00001,
+parser.add_argument('--lr', type=float, default=0.0001,
                     help="learning rate.")
-parser.add_argument('--epochs', type=int, default=500, help="Train loop")
+parser.add_argument('--epochs', type=int, default=1000, help="Train loop")
 parser.add_argument('--phase', type=str, default='eval',
                     help="train or eval? default:`eval`")
 parser.add_argument('--checkpoints_dir', default='../checkpoints',
@@ -104,6 +104,13 @@ def accuracy(output, target, topk=(1,)):
   return res
 
 
+def adjust_learning_rate(initial_lr=None, optimizer=None, epoch=None, every_epoch=2.4, reduction_rate=0.97):
+  """Sets the learning rate to the initial LR decayed by 0.97 every 2.4 epochs"""
+  lr = initial_lr * (reduction_rate ** (epoch // every_epoch))
+  for param_group in optimizer.param_groups:
+    param_group['lr'] = lr
+
+
 class AlexNet(nn.Module):
   """AlexNet model architecture from the
      One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -156,7 +163,7 @@ def train():
                                download=True,
                                train=True,
                                transform=transforms.Compose([
-                                 transforms.RandomResizedCrop(40),
+                                 transforms.RandomResizedCrop(36),
                                  transforms.Resize(opt.img_size),
                                  transforms.ColorJitter(),
                                  transforms.RandomHorizontalFlip(),
@@ -172,7 +179,7 @@ def train():
                                 download=True,
                                 train=True,
                                 transform=transforms.Compose([
-                                  transforms.RandomResizedCrop(40),
+                                  transforms.RandomResizedCrop(36),
                                   transforms.Resize(opt.img_size),
                                   transforms.ColorJitter(),
                                   transforms.RandomHorizontalFlip(),
@@ -202,6 +209,7 @@ def train():
   optimizer = optim.Adam(model.parameters(), lr=opt.lr)
 
   for epoch in range(opt.epochs):
+    adjust_learning_rate(opt.lr, optimizer, epoch)
     # train for one epoch
     print(f"\nBegin Training Epoch {epoch + 1}")
     # Calculate and return the top-k accuracy of the model
@@ -244,7 +252,6 @@ def train():
 
 
 def test():
-
   if opt.name == "cifar-10":
     test_dataset = dset.CIFAR10(root=opt.dataroot,
                                download=True,
@@ -316,5 +323,5 @@ if __name__ == '__main__':
     print("Loading model successful!")
     Top1, Top5 = test()
     print(
-      f"Top 1 accuracy of the network on the test images: {Top1:.6f}.\n"
-      f"Top 5 accuracy of the network on the test images: {Top5:.6f}.\n")
+      f"Top 1 accuracy of the network on the test images: {100 * Top1:.2f}%.\n"
+      f"Top 5 accuracy of the network on the test images: {100 * Top5:.2f}%.\n")

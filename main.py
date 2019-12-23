@@ -87,6 +87,8 @@ def train():
                                     transform=transforms.Compose([
                                     transforms.RandomResizedCrop(256, scale=(0.8, 1.0)),
                                     transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
+                                    transforms.RandomRotation(),
+                                    transforms.ColorJitter(),
                                     transforms.RandomHorizontalFlip(),
                                     transforms.ToTensor(),
                                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
