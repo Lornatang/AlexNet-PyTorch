@@ -165,6 +165,7 @@ def train():
                                transform=transforms.Compose([
                                  transforms.RandomResizedCrop(36),
                                  transforms.Resize(opt.img_size),
+                                 transforms.RandomRotation(degrees=15),
                                  transforms.ColorJitter(),
                                  transforms.RandomHorizontalFlip(),
                                  transforms.ToTensor(),
@@ -181,6 +182,7 @@ def train():
                                 transform=transforms.Compose([
                                   transforms.RandomResizedCrop(36),
                                   transforms.Resize(opt.img_size),
+                                  transforms.RandomRotation(degrees=15),
                                   transforms.ColorJitter(),
                                   transforms.RandomHorizontalFlip(),
                                   transforms.ToTensor(),
