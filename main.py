@@ -85,11 +85,11 @@ def train():
 
   train_dataset = dset.ImageFolder(root=TRAIN_DATASETS_PATH,
                                     transform=transforms.Compose([
-                                    # transforms.RandomResizedCrop(256, scale=(0.8, 1.0)),
+                                    transforms.RandomResizedCrop(256, scale=(0.8, 1.0)),
                                     transforms.Resize((opt.img_size, opt.img_size), interpolation=3),
-                                    # transforms.RandomRotation(degrees=15),
-                                    # transforms.ColorJitter(),
-                                    # transforms.RandomHorizontalFlip(),
+                                    transforms.RandomRotation(degrees=15),
+                                    transforms.ColorJitter(),
+                                    transforms.RandomHorizontalFlip(),
                                     transforms.ToTensor(),
                                     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
                                   ]))
