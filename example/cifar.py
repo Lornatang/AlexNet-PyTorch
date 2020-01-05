@@ -32,7 +32,7 @@ parser.add_argument('--dataroot', type=str,
 parser.add_argument('--name', type=str, default="cifar-10",
                     help="Dataset name. Default: cifar-10.")
 parser.add_argument('--workers', type=int,
-                    help='number of data loading workers', default=1)
+                    help='number of data loading workers', default=2)
 parser.add_argument('--batch_size', type=int,
                     default=128, help='inputs batch size')
 parser.add_argument('--img_size', type=int, default=32,
@@ -163,10 +163,6 @@ def train():
                                download=True,
                                train=True,
                                transform=transforms.Compose([
-                                 transforms.RandomResizedCrop(36),
-                                 transforms.Resize(opt.img_size),
-                                 transforms.RandomRotation(degrees=15),
-                                 transforms.ColorJitter(),
                                  transforms.RandomHorizontalFlip(),
                                  transforms.ToTensor(),
                                  transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
@@ -180,10 +176,6 @@ def train():
                                 download=True,
                                 train=True,
                                 transform=transforms.Compose([
-                                  transforms.RandomResizedCrop(36),
-                                  transforms.Resize(opt.img_size),
-                                  transforms.RandomRotation(degrees=15),
-                                  transforms.ColorJitter(),
                                   transforms.RandomHorizontalFlip(),
                                   transforms.ToTensor(),
                                   transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
