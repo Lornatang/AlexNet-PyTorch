@@ -17,6 +17,7 @@
 
 def adjust_learning_rate(initial_lr=None, optimizer=None, epoch=None, every_epoch=2.4, reduction_rate=0.97):
   """Sets the learning rate to the initial LR decayed by 0.97 every 2.4 epochs"""
-  lr = initial_lr * (reduction_rate ** (epoch // every_epoch))
-  for param_group in optimizer.param_groups:
-    param_group['lr'] = lr
+  if epoch != 0:
+    lr = initial_lr * (reduction_rate ** (epoch // every_epoch))
+    for param_group in optimizer.param_groups:
+      param_group['lr'] = lr
