@@ -115,6 +115,8 @@ dmypy.json
 
 # datasets
 datasets
+example/cifar/data
+example/imagenet/data
 
 # IDE file
 .idea
@@ -123,13 +125,8 @@ datasets
 # Mac file
 .DS_Store
 
-# generate imgs folder
-unknown/
-images/
-imgs/
-
 # Model file
-checkpoints/
+*.pth
 
 # API file
 static/
