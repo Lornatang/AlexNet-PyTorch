@@ -72,8 +72,10 @@ class AlexNet(nn.Module):
         return model
     
     @staticmethod
-    def load_weights(model_path, **kwargs):
-        model = AlexNet(**kwargs)
-        return model.load_state_dict(model_path, map_location=lambda storage, loc: storage)
+    def load_weights(model_name, num_classes):
+        model = AlexNet(num_classes)
+        checkpoint = torch.load(model_name)
+        model.load_state_dict(checkpoint['state_dict'])
+        return model
 
 
