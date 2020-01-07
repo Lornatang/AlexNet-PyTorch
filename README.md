@@ -15,11 +15,11 @@ _Upcoming features_: In the next few days, you will be able to:
  
 ### Table of contents
 1. [About AlexNet](#about-alexnet)
-2. [Usage](#usage)
-    * [Load models](#loading-models)
-    * [train models](#train)
-    * [eval models](#eval)
-3. [Contributing](#contributing) 
+2. [Installation](#installation)
+3. [Usage](#usage)
+    * [Load pretrained models](#loading-pretrained-models)
+    * [Example: Classify](#example-classification)
+4. [Contributing](#contributing) 
 
 ### About AlexNet
 
@@ -35,37 +35,77 @@ have been widely recognized (e.g., Pinto et al. [21]), but it has only recently 
 consists of hundreds of thousands of fully-segmented images, and ImageNet [6], which consists of
 over 15 million labeled high-resolution images in over 22,000 categories. 
 
-- **Resolution**
+### Installation
 
-|     Datasets     |  Top1  |  Top5  | DataArgumentation |
-|:----------------:|:------:|:------:|:-----------------:|
-|CIFAR-10          | 71.81% | 97.48% |         √         |
-|CIFAR-100         | 39.49% | 69.26% |         √         |
+Install from source:
+```bash
+git clone https://github.com/lornatang/AlexNet-PyTorch
+cd AlexNet-Pytorch
+pip install -e .
+``` 
 
 ### Usage
 
-#### Loading models
+#### Loading pretrained models
 
-```text
-if torch.cuda.device_count() > 1:
-model = torch.nn.parallel.DataParallel(AlexNet(num_classes=opt.num_classes))
-else:
-model = AlexNet(num_classes=opt.num_classes)
-if os.path.exists(MODEL_PATH):
-model.load_state_dict(torch.load(MODEL_PATH, map_location=lambda storage, loc: storage))
+Load an AlexNet:  
+```python
+from alexnet import AlexNet
+model = AlexNet()
 ```
 
-#### train
-
-```text
-python3 main --name <DATA_DIR> --num_classes <DATASETS_CLASSES> --phase train
+Load a pretrained AlexNet: 
+```python
+from alexnet import AlexNet
+model = AlexNet.from_pretrained('alexnet')
 ```
 
-#### eval
+Details about the models are below: 
 
-```text
-python3 main --name <DATA_DIR> --num_classes <DATASETS_CLASSES>
+|   *DatasetName*   |*# Params*|*Top-1 Acc.*|*Pretrained?*|
+|:-----------------:|:--------:|:----------:|:-----------:|
+|     `cifar10`     |    57M   |    79.1    |      ✓      |
+|     `cifar100`    |   57.4M  |    47.4    |      ✓      |
+
+
+#### Example: Classification
+
+We assume that in your current directory, there is a `img.jpg` file and a `labels_map.txt` file (ImageNet class names). These are both included in `examples/simple`. 
+
+```python
+import json
+from PIL import Image
+import torch
+from torchvision import transforms
+
+from alexnet import AlexNet
+model = AlexNet.from_pretrained('alexnet')
+
+# Preprocess image
+tfms = transforms.Compose([transforms.Resize(224), transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),])
+img = tfms(Image.open('img.jpg')).unsqueeze(0)
+print(img.shape) # torch.Size([1, 3, 224, 224])
+
+# Load ImageNet class names
+labels_map = json.load(open('labels_map.txt'))
+labels_map = [labels_map[str(i)] for i in range(1000)]
+
+# Classify
+model.eval()
+with torch.no_grad():
+    outputs = model(img)
+
+# Print predictions
+print('-----')
+for idx in torch.topk(outputs, k=5).indices.squeeze(0).tolist():
+    prob = torch.softmax(outputs, dim=1)[0, idx].item()
+    print('{label:<75} ({p:.2f}%)'.format(label=labels_map[idx], p=prob*100))
 ```
+
+#### ImageNet
+
+See `examples/imagenet` for details about evaluating on ImageNet.
 
 ### Contributing
 
