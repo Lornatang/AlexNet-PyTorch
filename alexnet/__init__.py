@@ -12,7 +12,7 @@
 # limitations under the License.
 # ==============================================================================
 
-__version__ = "0.1.0"
+__version__ = "0.4.0"
 from .model import AlexNet
 from .utils import adjust_learning_rate
 from .utils import accuracy
