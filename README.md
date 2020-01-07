@@ -11,7 +11,7 @@ At the moment, you can easily:
 
 _Upcoming features_: In the next few days, you will be able to:
  * Quickly finetune an AlexNet on your own dataset
- * Export EfficientNet models for production
+ * Export AlexNet models for production
  
 ### Table of contents
 1. [About AlexNet](#about-alexnet)
