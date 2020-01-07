@@ -65,9 +65,9 @@ class AlexNet(nn.Module):
         return x
     
     @staticmethod
-    def from_pretrained(progress=True, **kwargs):
+    def from_pretrained(model_name, progress=True, **kwargs):
         model = AlexNet(**kwargs)
-        state_dict = load_state_dict_from_url(model_urls['alexnet'], progress=progress)
+        state_dict = load_state_dict_from_url(model_urls[model_name], progress=progress)
         model.load_state_dict(state_dict)
         return model
     
