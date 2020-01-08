@@ -23,7 +23,7 @@ VERSION = '0.5.0'
 # What packages are required for this module to be executed?
 REQUIRED = [
     'torch',
-    'pillow'
+    'pillow', 'PyQt5', 'torchvision'
 ]
 
 # What packages are optional?

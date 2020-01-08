@@ -15,6 +15,7 @@
 import torch
 import torch.nn as nn
 
+
 class AlexNet(nn.Module):
   """AlexNet model architecture from the
      One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -57,7 +58,7 @@ class AlexNet(nn.Module):
 
   @staticmethod
   def load_weights(model_name, **kwargs):
-      model = AlexNet(**kwargs)
-      checkpoint = torch.load(model_name)
-      model.load_state_dict(checkpoint['state_dict'])
-      return model
+    model = AlexNet(**kwargs)
+    checkpoint = torch.load(model_name)
+    model.load_state_dict(checkpoint['state_dict'])
+    return model

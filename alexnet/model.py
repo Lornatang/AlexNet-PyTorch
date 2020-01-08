@@ -19,71 +19,69 @@ from .utils import load_pretrained_weights
 
 
 class AlexNet(nn.Module):
-    """AlexNet model architecture from the
-       One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
-    """
+  """AlexNet model architecture from the
+     One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
+  """
 
-    def __init__(self, num_classes=1000):
-        super(AlexNet, self).__init__()
-        self.features = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.Conv2d(64, 192, kernel_size=5, padding=2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.Conv2d(192, 384, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(384, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-        )
-        self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
-        self.classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Linear(256 * 6 * 6, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Linear(4096, num_classes),
-        )
+  def __init__(self, num_classes=1000):
+    super(AlexNet, self).__init__()
+    self.features = nn.Sequential(
+      nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
+      nn.ReLU(inplace=True),
+      nn.MaxPool2d(kernel_size=3, stride=2),
+      nn.Conv2d(64, 192, kernel_size=5, padding=2),
+      nn.ReLU(inplace=True),
+      nn.MaxPool2d(kernel_size=3, stride=2),
+      nn.Conv2d(192, 384, kernel_size=3, padding=1),
+      nn.ReLU(inplace=True),
+      nn.Conv2d(384, 256, kernel_size=3, padding=1),
+      nn.ReLU(inplace=True),
+      nn.Conv2d(256, 256, kernel_size=3, padding=1),
+      nn.ReLU(inplace=True),
+      nn.MaxPool2d(kernel_size=3, stride=2),
+    )
+    self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
+    self.classifier = nn.Sequential(
+      nn.Dropout(),
+      nn.Linear(256 * 6 * 6, 4096),
+      nn.ReLU(inplace=True),
+      nn.Dropout(),
+      nn.Linear(4096, 4096),
+      nn.ReLU(inplace=True),
+      nn.Linear(4096, num_classes),
+    )
 
-    def forward(self, x):
-        x = self.features(x)
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
-        x = self.classifier(x)
-        return x
-    
-    @classmethod
-    def from_name(cls, model_name, num_classes):
-        cls._check_model_name_is_valid(model_name)
-        model = AlexNet(num_classes=num_classes)
-        return model
-    
-    @classmethod
-    def from_pretrained(cls, model_name, num_classes=1000):
-        model = cls.from_name(model_name, num_classes)
-        load_pretrained_weights(model, model_name)
-        return model
+  def forward(self, x):
+    x = self.features(x)
+    x = self.avgpool(x)
+    x = torch.flatten(x, 1)
+    x = self.classifier(x)
+    return x
 
-    @classmethod
-    def _check_model_name_is_valid(cls, model_name):
-        """ Validates model name. None that pretrained weights are only available for
-        the first four models (alexnet) at the moment. """
-        valid_models = ['alexnet']
-        if model_name not in valid_models:
-            raise ValueError('model_name should be one of: `alexnet`.')
+  @classmethod
+  def from_name(cls, model_name, num_classes):
+    cls._check_model_name_is_valid(model_name)
+    model = AlexNet(num_classes=num_classes)
+    return model
 
-    @classmethod
-    def load_weights(cls, model_name, num_classes):
-        cls._check_model_name_is_valid(model_name)
-        model = AlexNet(num_classes=num_classes)
-        checkpoint = torch.load(model_name)
-        model.load_state_dict(checkpoint['state_dict'])
-        return model
+  @classmethod
+  def from_pretrained(cls, model_name, num_classes=1000):
+    model = cls.from_name(model_name, num_classes)
+    load_pretrained_weights(model, model_name)
+    return model
 
+  @classmethod
+  def _check_model_name_is_valid(cls, model_name):
+    """ Validates model name. None that pretrained weights are only available for
+    the first four models (alexnet) at the moment. """
+    valid_models = ['alexnet']
+    if model_name not in valid_models:
+      raise ValueError('model_name should be one of: `alexnet`.')
 
+  @classmethod
+  def load_weights(cls, model_name, num_classes):
+    cls._check_model_name_is_valid(model_name)
+    model = AlexNet(num_classes=num_classes)
+    checkpoint = torch.load(model_name)
+    model.load_state_dict(checkpoint['state_dict'])
+    return model

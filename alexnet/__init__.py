@@ -13,6 +13,7 @@
 # ==============================================================================
 
 __version__ = "0.5.0"
+
 from .model import AlexNet
 from .utils import adjust_learning_rate
 from .utils import accuracy
