@@ -78,4 +78,12 @@ class AlexNet(nn.Module):
         if model_name not in valid_models:
             raise ValueError('model_name should be one of: `alexnet`.')
 
+    @classmethod
+    def load_weights(cls, model_name, num_classes):
+        cls._check_model_name_is_valid(model_name)
+        model = AlexNet(num_classes=num_classes)
+        checkpoint = torch.load(model_name)
+        model.load_state_dict(checkpoint['state_dict'])
+        return model
+
 
