@@ -15,13 +15,7 @@
 import torch
 import torch.nn as nn
 from torch.hub import load_state_dict_from_url
-
-__all__ = ['AlexNet', 'alexnet']
-
-
-model_urls = {
-    'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
-}
+from .utils import load_pretrained_weights
 
 
 class AlexNet(nn.Module):
@@ -64,18 +58,24 @@ class AlexNet(nn.Module):
         x = self.classifier(x)
         return x
     
-    @staticmethod
-    def from_pretrained(model_name, progress=True, **kwargs):
-        model = AlexNet(**kwargs)
-        state_dict = load_state_dict_from_url(model_urls[model_name], progress=progress)
-        model.load_state_dict(state_dict)
+    @classmethod
+    def from_name(cls, model_name, num_classes):
+        cls._check_model_name_is_valid(model_name)
+        model = AlexNet(num_classes=num_classes)
         return model
     
-    @staticmethod
-    def load_weights(model_name, num_classes):
-        model = AlexNet(num_classes)
-        checkpoint = torch.load(model_name)
-        model.load_state_dict(checkpoint['state_dict'])
+    @classmethod
+    def from_pretrained(cls, model_name, num_classes=1000):
+        model = cls.from_name(model_name, num_classes)
+        load_pretrained_weights(model, model_name)
         return model
+
+    @classmethod
+    def _check_model_name_is_valid(cls, model_name):
+        """ Validates model name. None that pretrained weights are only available for
+        the first four models (alexnet) at the moment. """
+        valid_models = ['alexnet']
+        if model_name not in valid_models:
+            raise ValueError('model_name should be one of: `alexnet`.')
 
 
