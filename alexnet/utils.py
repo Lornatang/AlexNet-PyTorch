@@ -65,3 +65,11 @@ def load_pretrained_weights(model, model_name):
     state_dict = model_zoo.load_url(url_map[model_name])
     model.load_state_dict(state_dict)
     print('Loaded pretrained weights for {}'.format(model_name))
+
+
+def get_parameter_number(model):
+    total_num = sum(p.numel() for p in model.parameters())
+    trainable_num = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Total parameters: {total_num/1000000:.1f}M")
+    print(f"Trainable parameters: {trainable_num/1000000:.1f}M")
+    
