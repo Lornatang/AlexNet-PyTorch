@@ -36,7 +36,7 @@ tfms = transforms.Compose([transforms.Resize(image_size), transforms.CenterCrop(
 img = tfms(img).unsqueeze(0)
 
 # Load class names
-labels_map = json.load(open('labels_map.txt'))
+labels_map = json.load(open('labels_map_1000.txt'))
 labels_map = [labels_map[str(i)] for i in range(1000)]
 
 # Classify with AlexNet
