@@ -15,16 +15,31 @@
 import torch
 import torch.nn as nn
 from torch.hub import load_state_dict_from_url
+
+from .utils import alexnet_params
+from .utils import get_model_params
 from .utils import load_pretrained_weights
+
+# AlexNet model architecture from the One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
 
 
 class AlexNet(nn.Module):
-    """AlexNet model architecture from the
-     One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
+    """ An AlexNet model. Most easily loaded with the .from_name or .from_pretrained methods
+
+    Args:
+      global_params (namedtuple): A set of GlobalParams shared between blocks
+
+    Example:
+        model = AlexNet.from_pretrained('alexnet-e0')
     """
 
-    def __init__(self, num_classes=1000):
-        super(AlexNet, self).__init__()
+    def __init__(self, global_params=None):
+        super().__init__()
+        self._global_params = global_params
+
+        dropout_rate = self._global_params.dropout_rate
+        num_classes = self._global_params.num_classes
+
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
             nn.ReLU(inplace=True),
@@ -42,10 +57,10 @@ class AlexNet(nn.Module):
         )
         self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
         self.classifier = nn.Sequential(
-            nn.Dropout(),
+            nn.Dropout(p=dropout_rate),
             nn.Linear(256 * 6 * 6, 4096),
             nn.ReLU(inplace=True),
-            nn.Dropout(),
+            nn.Dropout(p=dropout_rate),
             nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
             nn.Linear(4096, num_classes),
@@ -59,29 +74,28 @@ class AlexNet(nn.Module):
         return x
 
     @classmethod
-    def from_name(cls, model_name, num_classes):
+    def from_name(cls, model_name, override_params=None):
         cls._check_model_name_is_valid(model_name)
-        model = AlexNet(num_classes=num_classes)
-        return model
+        global_params = get_model_params(model_name, override_params)
+        return cls(global_params)
 
     @classmethod
     def from_pretrained(cls, model_name, num_classes=1000):
-        model = cls.from_name(model_name, num_classes)
-        load_pretrained_weights(model, model_name)
+        model = cls.from_name(model_name, override_params={'num_classes': num_classes})
+        load_pretrained_weights(model, model_name, load_fc=(num_classes == 1000))
         return model
 
     @classmethod
-    def _check_model_name_is_valid(cls, model_name):
-        """ Validates model name. None that pretrained weights are only available for
-    the first four models (alexnet) at the moment. """
-        valid_models = ['alexnet']
-        if model_name not in valid_models:
-            raise ValueError('model_name should be one of: `alexnet`.')
-
-    @classmethod
-    def load_weights(cls, model_name, num_classes):
+    def get_image_size(cls, model_name):
         cls._check_model_name_is_valid(model_name)
-        model = AlexNet(num_classes=num_classes)
-        checkpoint = torch.load(model_name)
-        model.load_state_dict(checkpoint['state_dict'])
-        return model
+        res, _ = alexnet_params(model_name)
+        return res
+
+    @classmethod
+    def _check_model_name_is_valid(cls, model_name, also_need_pretrained_weights=False):
+        """ Validates model name. None that pretrained weights are only available for
+        the first four models (alexnet-e{i} for i in 0,1,2,3) at the moment. """
+        num_models = 4
+        valid_models = ['alexnet-e'+str(i) for i in range(num_models)]
+        if model_name not in valid_models:
+            raise ValueError('model_name should be one of: ' + ', '.join(valid_models))

@@ -41,7 +41,7 @@ labels_map = [labels_map[str(i)] for i in range(1000)]
 
 # Classify with AlexNet
 print("=> loading checkpoint 'alexnet'.")
-model = AlexNet().load_weights('model_best.pth', 1000)
+model = AlexNet.from_pretrained('alexnet-e3')
 print("=> loaded checkpoint 'alexnet'.")
 model.eval()
 with torch.no_grad():

@@ -68,6 +68,8 @@ parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
+parser.add_argument('--pretrained', dest='pretrained', action='store_true',
+                    help='use pre-trained model')
 parser.add_argument('--world-size', default=-1, type=int,
                     help='number of nodes for distributed training')
 parser.add_argument('--rank', default=-1, type=int,
@@ -122,12 +124,7 @@ def main():
         args.world_size = ngpus_per_node * args.world_size
         # Use torch.multiprocessing.spawn to launch distributed processes: the
         # main_worker process function
-        mp.spawn(
-            main_worker,
-            nprocs=ngpus_per_node,
-            args=(
-                ngpus_per_node,
-                args))
+        mp.spawn(main_worker,nprocs=ngpus_per_node,args=(ngpus_per_node,args))
     else:
         # Simply call main_worker function
         main_worker(args.gpu, ngpus_per_node, args)
@@ -151,8 +148,12 @@ def main_worker(gpu, ngpus_per_node, args):
                                 world_size=args.world_size, rank=args.rank)
     # create model
     if 'alexnet' in args.arch:  # NEW
-        print("=> creating model '{}'".format(args.arch))
-        model = AlexNet(num_classes=args.num_classes)
+        if args.pretrained:
+            model = AlexNet.from_pretrained(args.arch)
+            print("=> using pre-trained model '{}'".format(args.arch))
+        else:
+            print("=> creating model '{}'".format(args.arch))
+            model = AlexNet.from_name(args.arch)
     else:
         warnings.warn("Plesase --arch alexnet.")
 
@@ -230,14 +231,12 @@ def main_worker(gpu, ngpus_per_node, args):
         ]))
 
     if args.distributed:
-        train_sampler = torch.utils.data.distributed.DistributedSampler(
-            train_dataset)
+        train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     else:
         train_sampler = None
 
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=(
-            train_sampler is None),
+        train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
         num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
     if 'alexnet' in args.arch:
@@ -414,7 +413,7 @@ class AverageMeter(object):
 
 class ProgressMeter(object):
     def __init__(self, num_batches, *meters, prefix=""):
-        self.batch_fmtstr = _get_batch_fmtstr(num_batches)
+        self.batch_fmtstr = self._get_batch_fmtstr(num_batches)
         self.meters = meters
         self.prefix = prefix
 

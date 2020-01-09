@@ -23,6 +23,7 @@ import random
 import shutil
 import time
 import warnings
+import PIL
 
 import torch
 import torch.backends.cudnn as cudnn
@@ -37,13 +38,13 @@ import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 
 from alexnet import get_parameter_number
-from example.cifar.model import AlexNet
+from alexnet import AlexNet
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR Training')
 parser.add_argument('data', metavar='DIR',
                     help='path to dataset')
-parser.add_argument('-a', '--arch', metavar='ARCH', default='alexnet',
-                    help='model architecture (default: alexnet)')
+parser.add_argument('-a', '--arch', metavar='ARCH', default='alexnet-e3',
+                    help='model architecture (default: alexnet-e3)')
 parser.add_argument('-j', '--workers', default=1, type=int, metavar='N',
                     help='number of data loading workers (default: 1)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
@@ -68,6 +69,8 @@ parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
+parser.add_argument('--pretrained', dest='pretrained', action='store_true',
+                    help='use pre-trained model')
 parser.add_argument('--world-size', default=-1, type=int,
                     help='number of nodes for distributed training')
 parser.add_argument('--rank', default=-1, type=int,
@@ -80,8 +83,6 @@ parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--gpu', default=0, type=int,
                     help='GPU id to use.')
-parser.add_argument('--image_size', default=224, type=int,
-                    help='image size')
 parser.add_argument('--num_classes', type=int, default=10,
                     help="number of dataset category.")
 parser.add_argument('--multiprocessing-distributed', action='store_true',
@@ -122,12 +123,7 @@ def main():
         args.world_size = ngpus_per_node * args.world_size
         # Use torch.multiprocessing.spawn to launch distributed processes: the
         # main_worker process function
-        mp.spawn(
-            main_worker,
-            nprocs=ngpus_per_node,
-            args=(
-                ngpus_per_node,
-                args))
+        mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
     else:
         # Simply call main_worker function
         main_worker(args.gpu, ngpus_per_node, args)
@@ -151,8 +147,12 @@ def main_worker(gpu, ngpus_per_node, args):
                                 world_size=args.world_size, rank=args.rank)
     # create model
     if 'alexnet' in args.arch:  # NEW
-        print("=> creating model '{}'".format(args.arch))
-        model = AlexNet(num_classes=args.num_classes)
+        if args.pretrained:
+            model = AlexNet.from_pretrained(args.arch)
+            print("=> using pre-trained model '{}'".format(args.arch))
+        else:
+            print("=> creating model '{}'".format(args.arch))
+            model = AlexNet.from_custom(args.arch, num_classes=args.num_classes)
     else:
         warnings.warn("Plesase --arch alexnet.")
 
@@ -168,8 +168,7 @@ def main_worker(gpu, ngpus_per_node, args):
             # ourselves based on the total number of GPUs we have
             args.batch_size = int(args.batch_size / ngpus_per_node)
             args.workers = int(args.workers / ngpus_per_node)
-            model = torch.nn.parallel.DistributedDataParallel(
-                model, device_ids=[args.gpu])
+            model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         else:
             model.cuda()
             # DistributedDataParallel will divide and allocate batch_size to all
@@ -231,20 +230,18 @@ def main_worker(gpu, ngpus_per_node, args):
         ]))
 
     if args.distributed:
-        train_sampler = torch.utils.data.distributed.DistributedSampler(
-            train_dataset)
+        train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
     else:
         train_sampler = None
 
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=(
-            train_sampler is None),
+        train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
         num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
     if 'alexnet' in args.arch:
-        image_size = 32
+        image_size = AlexNet.get_image_size(args.arch)
         val_transforms = transforms.Compose([
-            transforms.Resize(image_size, interpolation=3),
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
             transforms.CenterCrop(image_size),
             transforms.ToTensor(),
             normalize,
