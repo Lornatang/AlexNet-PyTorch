@@ -45,11 +45,11 @@ model = AlexNet().load_weights('model_best.pth')
 print("=> loaded checkpoint 'alexnet'.")
 model.eval()
 with torch.no_grad():
-  logits = model(img)
+    logits = model(img)
 preds = torch.topk(logits, k=5).indices.squeeze(0).tolist()
 
 print('-----')
 for idx in preds:
-  label = labels_map[idx]
-  prob = torch.softmax(logits, dim=1)[0, idx].item()
-  print('{:<75} ({:.2f}%)'.format(label, prob * 100))
+    label = labels_map[idx]
+    prob = torch.softmax(logits, dim=1)[0, idx].item()
+    print('{:<75} ({:.2f}%)'.format(label, prob * 100))

@@ -23,7 +23,9 @@ VERSION = '0.5.0'
 # What packages are required for this module to be executed?
 REQUIRED = [
     'torch',
-    'pillow', 'PyQt5', 'torchvision'
+    'pillow',
+    'pyqt5',
+    'torchvision'
 ]
 
 # What packages are optional?
@@ -34,7 +36,8 @@ EXTRAS = {
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
 # Except, perhaps the License and Trove Classifiers!
-# If you do change the License, remember to change the Trove Classifier for that!
+# If you do change the License, remember to change the Trove Classifier
+# for that!
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -81,7 +84,8 @@ class UploadCommand(Command):
             pass
 
         self.status('Building Source and Wheel (universal) distribution…')
-        os.system('{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
+        os.system(
+            '{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
 
         self.status('Uploading the package to PyPI via Twine…')
         os.system('twine upload dist/*')
@@ -104,8 +108,14 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
-    # py_modules=['model'], # If your package is a single module, use this instead of 'packages'
+    packages=find_packages(
+        exclude=[
+            "tests",
+            "*.tests",
+            "*.tests.*",
+            "tests.*"]),
+    # py_modules=['model'], # If your package is a single module, use this
+    # instead of 'packages'
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,

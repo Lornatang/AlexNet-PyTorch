@@ -1,15 +1,12 @@
-import sys
-import os
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-
 import json
-from PIL import Image
+import sys
 
 import torch
 import torchvision.transforms as transforms
+from PIL import Image
+from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtWidgets import *
+
 from alexnet import AlexNet
 
 
@@ -29,9 +26,9 @@ def classifier(image_path):
         return label, prob * 100
 
 
-class picture(QWidget):
+class Picture(QWidget):
     def __init__(self):
-        super(picture, self).__init__()
+        super(Picture, self).__init__()
 
         self.resize(1000, 1000)
         self.setWindowTitle("Classifier tool")
@@ -50,11 +47,11 @@ class picture(QWidget):
         btn.clicked.connect(self.openimage)
 
     def openimage(self):
-        imgName, imgType = QFileDialog.getOpenFileName(
+        img, _ = QFileDialog.getOpenFileName(
             self, "Open image", "", "*.jpg;;*.png;;All Files(*)")
-        jpg = QtGui.QPixmap(imgName).scaled(224, 224)
+        jpg = QtGui.QPixmap(img).scaled(224, 224)
         self.label.setPixmap(jpg)
-        text, prob = classifier(str(imgName))
+        text, prob = classifier(str(img))
         self.echo(str(text), str(prob))
 
     def echo(self, text, prob):
@@ -79,6 +76,6 @@ if __name__ == "__main__":
     labels_map = [labels_map[str(i)] for i in range(1000)]
 
     app = QtWidgets.QApplication(sys.argv)
-    my = picture()
+    my = Picture()
     my.show()
     sys.exit(app.exec_())

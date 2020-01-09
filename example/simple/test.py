@@ -17,10 +17,10 @@ In this simple example, we load an image, pre-process it, and classify it with a
 """
 
 import json
-from PIL import Image
 
 import torch
 import torchvision.transforms as transforms
+from PIL import Image
 
 from alexnet import AlexNet
 
@@ -44,11 +44,11 @@ model = AlexNet().from_pretrained('alexnet')
 print('Loaded pretrained weights for alexnet.')
 model.eval()
 with torch.no_grad():
-  logits = model(img)
+    logits = model(img)
 preds = torch.topk(logits, k=5).indices.squeeze(0).tolist()
 
 print('-----')
 for idx in preds:
-  label = labels_map[idx]
-  prob = torch.softmax(logits, dim=1)[0, idx].item()
-  print('{:<75} ({:.2f}%)'.format(label, prob * 100))
+    label = labels_map[idx]
+    prob = torch.softmax(logits, dim=1)[0, idx].item()
+    print('{:<75} ({:.2f}%)'.format(label, prob * 100))
