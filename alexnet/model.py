@@ -18,6 +18,7 @@ from torch.hub import load_state_dict_from_url
 
 from .utils import alexnet_params
 from .utils import get_model_params
+from .utils import load_custom_weights
 from .utils import load_pretrained_weights
 
 # AlexNet model architecture from the One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -83,6 +84,12 @@ class AlexNet(nn.Module):
     def from_pretrained(cls, model_name, num_classes=1000):
         model = cls.from_name(model_name, override_params={'num_classes': num_classes})
         load_pretrained_weights(model, model_name, load_fc=(num_classes == 1000))
+        return model
+    
+    @classmethod
+    def from_custom(cls, model_name, resume, num_classes):
+        model = cls.from_name(model_name, override_params={'num_classes': num_classes})
+        load_custom_weights(model, resume)
         return model
 
     @classmethod

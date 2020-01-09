@@ -147,6 +147,12 @@ def load_pretrained_weights(model, model_name, load_fc=True):
     print(f"Loaded pretrained weights for {model_name}.")
 
 
+def load_custom_weights(model, model_name):
+    """ Loads custom weights, and train if loading for the first time. """
+    checkpoint = torch.load(model_name)
+    model.load_state_dict(checkpoint['state_dict'])
+
+
 def get_parameter_number(model):
     total_num = sum(p.numel() for p in model.parameters())
     trainable_num = sum(p.numel() for p in model.parameters() if p.requires_grad)
