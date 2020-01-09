@@ -1,5 +1,6 @@
 import json
 import sys
+import argparse
 
 import torch
 import torchvision.transforms as transforms
@@ -10,20 +11,32 @@ from PyQt5.QtWidgets import *
 from alexnet import AlexNet
 
 
+parser = argparse.ArgumentParser("AlexNet Classifier Tool")
+parser.add_argument("-w" ,"--model_name", type=str, default='alexnet-e3',
+                    help="Weight of the model loaded by default.")
+parser.add_argument("-s", "--image_size", type=int, default=None,
+                    help="Size of classified image. (default=None).")
+parser.add_argument("-l", "--labels_map", type=str, default="./labels_map.txt",
+                    help="Image tag. (default='./labels_map.txt').")
+parser.add_argument("-n", "--num_classes", type=int, default=1000,
+                    help="Number of categories of images. (default=1000).")
+args = parser.parse_args()
+
+
 def classifier(image_path):
     # Open image
     img = Image.open(image_path)
     img = tfms(img).unsqueeze(0)
 
-    # Classify with EfficientNet
+    # Classify with AlexNet
     with torch.no_grad():
         logits = model(img)
     preds = torch.topk(logits, k=1).indices.squeeze(0).tolist()
 
     for idx in preds:
         label = labels_map[idx]
-        prob = torch.softmax(logits, dim=1)[0, idx].item()
-        return label, prob * 100
+        probability = torch.softmax(logits, dim=1)[0, idx].item()
+    return label, probability
 
 
 class Picture(QWidget):
@@ -34,7 +47,7 @@ class Picture(QWidget):
         self.setWindowTitle("Classifier tool")
 
         self.label = QLabel(self)
-        self.label.setFixedSize(224, 224)
+        self.label.setFixedSize(args.image_size, args.image_size)
         self.label.move(300, 300)
         self.label.setStyleSheet(
             "QLabel{background:white;}"
@@ -47,33 +60,34 @@ class Picture(QWidget):
         btn.clicked.connect(self.openimage)
 
     def openimage(self):
-        img, _ = QFileDialog.getOpenFileName(
-            self, "Open image", "", "*.jpg;;*.png;;All Files(*)")
-        jpg = QtGui.QPixmap(img).scaled(224, 224)
+        img_name, _ = QFileDialog.getOpenFileName(self, "Open image", "", "*.jpg;;*.png;;All Files(*)")
+        jpg = QtGui.QPixmap(img_name).scaled(args.image_size, args.image_size)
         self.label.setPixmap(jpg)
-        text, prob = classifier(str(img))
-        self.echo(str(text), str(prob))
+        text, prob = classifier(img_name)
+        self.echo(str(text), prob)
 
     def echo(self, text, prob):
         QMessageBox.information(
             self, "Message",
-            "Label :{}\nprob: {}".format(str(text), str(prob)))
+            f"Label :{str(text):<75}\nProbability: {prob:.6f}")
 
 
 if __name__ == "__main__":
-    model = AlexNet().from_pretrained('alexnet')
+    model = AlexNet.from_pretrained(args.model_name)
     model.eval()
+    if args.image_size is None:
+        args.image_size = AlexNet.get_image_size(args.model_name)
     # Preprocess image
     tfms = transforms.Compose([
-        transforms.Resize(224),
-        transforms.CenterCrop(224),
+        transforms.Resize(args.image_size),
+        transforms.CenterCrop(args.image_size),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     ])
 
     # Load class names
-    labels_map = json.load(open('labels_map.txt'))
-    labels_map = [labels_map[str(i)] for i in range(1000)]
+    labels_map = json.load(open(args.labels_map))
+    labels_map = [labels_map[str(i)] for i in range(args.num_classes)]
 
     app = QtWidgets.QApplication(sys.argv)
     my = Picture()

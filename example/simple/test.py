@@ -40,8 +40,8 @@ labels_map = json.load(open('labels_map.txt'))
 labels_map = [labels_map[str(i)] for i in range(1000)]
 
 # Classify with EfficientNet
-model = AlexNet().from_pretrained('alexnet')
-print('Loaded pretrained weights for alexnet.')
+model = AlexNet.from_pretrained('alexnet-e3')
+print('Loaded pretrained weights for alexnet-e3.')
 model.eval()
 with torch.no_grad():
     logits = model(img)

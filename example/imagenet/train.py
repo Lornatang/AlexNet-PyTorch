@@ -241,9 +241,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     if 'alexnet' in args.arch:
         val_transforms = transforms.Compose([
-            transforms.Resize(
-                args.image_size,
-                interpolation=PIL.Image.BICUBIC),
+            transforms.Resize(args.image_size, interpolation=PIL.Image.BICUBIC),
             transforms.CenterCrop(args.image_size),
             transforms.ToTensor(),
             normalize,
