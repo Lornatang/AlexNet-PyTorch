@@ -36,11 +36,11 @@ import torch.utils.data.distributed
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 
+from apex import amp
 from alexnet import AlexNet
-from alexnet.utils import get_parameter_number
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
-parser.add_argument('data', metavar='DIR',
+parser.add_argument('data', metavar='DIR', default='data',
                     help='path to dataset')
 parser.add_argument('-a', '--arch', metavar='ARCH', default='alexnet-e3',
                     help='model architecture (default: alexnet-e3)')
@@ -55,7 +55,7 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
-parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
@@ -66,6 +66,8 @@ parser.add_argument('-p', '--print-freq', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
+parser.add_argument('--opt_level', default="O1", type=str,
+                    help="Choose which accuracy to train. (default: 'O1')")
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
@@ -91,12 +93,12 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                          'N processes per node, which has N GPUs. This is the '
                          'fastest way to use PyTorch for either single node or '
                          'multi node data parallel training')
+args = parser.parse_args()
 
 best_acc1 = 0
 
 
 def main():
-    args = parser.parse_args()
 
     if args.seed is not None:
         random.seed(args.seed)
@@ -124,7 +126,7 @@ def main():
         args.world_size = ngpus_per_node * args.world_size
         # Use torch.multiprocessing.spawn to launch distributed processes: the
         # main_worker process function
-        mp.spawn(main_worker,nprocs=ngpus_per_node,args=(ngpus_per_node,args))
+        mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
     else:
         # Simply call main_worker function
         main_worker(args.gpu, ngpus_per_node, args)
@@ -153,9 +155,9 @@ def main_worker(gpu, ngpus_per_node, args):
             print("=> using pre-trained model '{}'".format(args.arch))
         else:
             print("=> creating model '{}'".format(args.arch))
-            model = AlexNet.from_custom(args.arch, args.resume, args.num_classes)
+            model = AlexNet.from_name(args.arch)
     else:
-        warnings.warn("Plesase --arch alexnet-e3.")
+        warnings.warn("Plesase --arch alexnet.")
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
@@ -188,13 +190,14 @@ def main_worker(gpu, ngpus_per_node, args):
         else:
             model = torch.nn.DataParallel(model).cuda()
 
-    get_parameter_number(model)
-
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(args.gpu)
 
-    optimizer = torch.optim.Adam(model.parameters(), args.lr,
-                                 weight_decay=args.weight_decay)
+    optimizer = torch.optim.SGD(model.parameters(), args.lr,
+                                momentum=args.momentum,
+                                weight_decay=args.weight_decay)
+
+    model, optimizer = amp.initialize(model, optimizer, opt_level=args.opt_level)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -203,8 +206,12 @@ def main_worker(gpu, ngpus_per_node, args):
             checkpoint = torch.load(args.resume)
             args.start_epoch = checkpoint['epoch']
             best_acc1 = checkpoint['best_acc1']
+            if args.gpu is not None:
+                # best_acc1 may be from a checkpoint from a different GPU
+                best_acc1 = best_acc1.to(args.gpu)
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
+            amp.load_state_dict(checkpoint['amp'])
             print(f"=> loaded checkpoint '{args.resume}' (epoch {checkpoint['epoch']})")
         else:
             print(f"=> no checkpoint found at '{args.resume}'")
@@ -213,7 +220,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # Data loading code
     traindir = os.path.join(args.data, 'train')
-    valdir = os.path.join(args.data, 'val')
+    valdir = os.path.join(args.data, 'test')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
@@ -236,21 +243,22 @@ def main_worker(gpu, ngpus_per_node, args):
         num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
     if 'alexnet' in args.arch:
+        image_size = AlexNet.get_image_size(args.arch)
         val_transforms = transforms.Compose([
-            transforms.Resize(args.image_size, interpolation=PIL.Image.BICUBIC),
-            transforms.CenterCrop(args.image_size),
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
             transforms.ToTensor(),
             normalize,
         ])
-        print('Using image size', args.image_size)
+        print('Using image size', image_size)
     else:
         val_transforms = transforms.Compose([
             transforms.Resize(256),
-            transforms.CenterCrop(args.image_size),
+            transforms.CenterCrop(224),
             transforms.ToTensor(),
             normalize,
         ])
-        print('Using image size', args.image_size)
+        print('Using image size', 224)
 
     val_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(valdir, val_transforms),
@@ -258,9 +266,9 @@ def main_worker(gpu, ngpus_per_node, args):
         num_workers=args.workers, pin_memory=True)
 
     if args.evaluate:
-        res = validate(val_loader, model, criterion, args)
+        top1, top5 = validate(val_loader, model, criterion, args)
         with open('res.txt', 'w') as f:
-            print(res, file=f)
+            print(f"Acc@1: {top1}\tAcc@5: {top5}", file=f)
         return
 
     for epoch in range(args.start_epoch, args.epochs):
@@ -272,7 +280,7 @@ def main_worker(gpu, ngpus_per_node, args):
         train(train_loader, model, criterion, optimizer, epoch, args)
 
         # evaluate on validation set
-        acc1 = validate(val_loader, model, criterion, args)
+        acc1, _ = validate(val_loader, model, criterion, args)
 
         # remember best acc@1 and save checkpoint
         is_best = acc1 > best_acc1
@@ -286,6 +294,7 @@ def main_worker(gpu, ngpus_per_node, args):
                 'state_dict': model.state_dict(),
                 'best_acc1': best_acc1,
                 'optimizer': optimizer.state_dict(),
+                'amp': amp.state_dict(),
             }, is_best)
 
 
@@ -322,7 +331,8 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
         # compute gradient and do Adam step
         optimizer.zero_grad()
-        loss.backward()
+        with amp.scale_loss(loss, optimizer) as scaled_loss:
+            scaled_loss.backward()
         optimizer.step()
 
         # measure elapsed time
@@ -371,13 +381,13 @@ def validate(val_loader, model, criterion, args):
         print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
               .format(top1=top1, top5=top5))
 
-    return top1.avg
+    return top1.avg, top5.avg
 
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth'):
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, 'model_best.pth')
+        shutil.copyfile(filename, "model_best.pth")
 
 
 class AverageMeter(object):
@@ -445,6 +455,22 @@ def accuracy(output, target, topk=(1,)):
             correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
             res.append(correct_k.mul_(100.0 / batch_size))
         return res
+
+
+def get_parameter_number(model):
+    total_num = sum(p.numel() for p in model.parameters())
+    trainable_num = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Total parameters: {total_num / 1000000:.1f}M")
+    print(f"Trainable parameters: {trainable_num / 1000000:.1f}M")
+
+
+def print_state_dict(model):
+    print("----------------------------------------------------------")
+    print("|                    state dict pram                     |")
+    print("----------------------------------------------------------")
+    for param_tensor in model.state_dict():
+        print(param_tensor, '\t', model.state_dict()[param_tensor].size())
+    print("----------------------------------------------------------")
 
 
 if __name__ == '__main__':

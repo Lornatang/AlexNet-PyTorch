@@ -14,11 +14,9 @@
 
 import torch
 import torch.nn as nn
-from torch.hub import load_state_dict_from_url
 
 from .utils import alexnet_params
 from .utils import get_model_params
-from .utils import load_custom_weights
 from .utils import load_pretrained_weights
 
 # AlexNet model architecture from the One weird trick..." <https://arxiv.org/abs/1404.5997>`_ paper.
@@ -38,9 +36,6 @@ class AlexNet(nn.Module):
         super().__init__()
         self._global_params = global_params
 
-        dropout_rate = self._global_params.dropout_rate
-        num_classes = self._global_params.num_classes
-
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
             nn.ReLU(inplace=True),
@@ -58,13 +53,13 @@ class AlexNet(nn.Module):
         )
         self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
         self.classifier = nn.Sequential(
-            nn.Dropout(p=dropout_rate),
+            nn.Dropout(self._global_params.dropout_rate),
             nn.Linear(256 * 6 * 6, 4096),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=dropout_rate),
+            nn.Dropout(self._global_params.dropout_rate),
             nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
-            nn.Linear(4096, num_classes),
+            nn.Linear(4096, self._global_params.num_classes),
         )
 
     def forward(self, x):
@@ -85,12 +80,6 @@ class AlexNet(nn.Module):
         model = cls.from_name(model_name, override_params={'num_classes': num_classes})
         load_pretrained_weights(model, model_name, load_fc=(num_classes == 1000))
         return model
-    
-    @classmethod
-    def from_custom(cls, model_name, resume, num_classes):
-        model = cls.from_name(model_name, override_params={'num_classes': num_classes})
-        load_custom_weights(model, resume)
-        return model
 
     @classmethod
     def get_image_size(cls, model_name):
@@ -99,10 +88,9 @@ class AlexNet(nn.Module):
         return res
 
     @classmethod
-    def _check_model_name_is_valid(cls, model_name, also_need_pretrained_weights=False):
+    def _check_model_name_is_valid(cls, model_name):
         """ Validates model name. None that pretrained weights are only available for
-        the first four models (alexnet-e{i} for i in 0,1,2,3) at the moment. """
-        num_models = 4
-        valid_models = ['alexnet-e'+str(i) for i in range(num_models)]
+        the first four models (alexnet) at the moment. """
+        valid_models = ['alexnet']
         if model_name not in valid_models:
             raise ValueError('model_name should be one of: ' + ', '.join(valid_models))
