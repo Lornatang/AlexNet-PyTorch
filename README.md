@@ -66,10 +66,10 @@ model = AlexNet.from_pretrained('alexnet')
 
 Details about the models are below: 
 
-|   *DatasetName*   |*# Params*|*Top-1 Acc.*|*Pretrained?*|
-|:-----------------:|:--------:|:----------:|:-----------:|
-|     `cifar10`     |    57M   |    79.1    |      ✓      |
-|     `cifar100`    |   57.4M  |    47.4    |      ✓      |
+|   *Name*   |*# Params*|*Top-1 Acc.*|*Top-1 Acc.*|*Pretrained?*|
+|:----------:|:--------:|:----------:|:----------:|:-----------:|
+|  `AlexNet` |    57M   |    63%     |      85%   |      √      |
+
 
 
 #### Example: Classification
