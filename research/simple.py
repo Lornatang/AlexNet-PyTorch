@@ -93,12 +93,12 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                          'N processes per node, which has N GPUs. This is the '
                          'fastest way to use PyTorch for either single node or '
                          'multi node data parallel training')
-args = parser.parse_args()
 
 best_acc1 = 0
 
 
 def main():
+    args = parser.parse_args()
 
     if args.seed is not None:
         random.seed(args.seed)
@@ -231,6 +231,15 @@ def main_worker(gpu, ngpus_per_node, args):
             transforms.ToTensor(),
             normalize,
         ]))
+    
+    test_dataset = datasets.ImageFolder(
+        traindir,
+        transform=transforms.Compose([
+            transforms.Resize(args.image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(args.image_size),
+            transforms.ToTensor(),
+            normalize,
+        ]))
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -241,26 +250,8 @@ def main_worker(gpu, ngpus_per_node, args):
         train_dataset, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
-    if 'alexnet' in args.arch:
-        image_size = AlexNet.get_image_size(args.arch)
-        val_transforms = transforms.Compose([
-            transforms.RandomResizedCrop(image_size),
-            transforms.ToTensor(),
-            normalize,
-        ])
-        print('Using image size', image_size)
-    else:
-        val_transforms = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            normalize,
-        ])
-        print('Using image size', 224)
-
     test_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(valdir, val_transforms),
-        batch_size=args.batch_size, shuffle=False,
+        test_dataset, batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True)
 
     if args.evaluate:
