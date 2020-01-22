@@ -117,6 +117,7 @@ dmypy.json
 datasets
 example/cifar/data
 example/imagenet/data
+research/data
 
 # IDE file
 .idea
@@ -127,6 +128,7 @@ example/imagenet/data
 
 # Model file
 *.pth
+
 
 # API file
 static/
