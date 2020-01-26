@@ -68,7 +68,7 @@ Details about the models are below:
 
 |   *Name*   |*# Params*|*Top-1 Acc.*|*Top-5 Acc.*|*Pretrained?*|
 |:----------:|:--------:|:----------:|:----------:|:-----------:|
-|  `AlexNet` |    57M   |    63%     |     85%    |      √      |
+|  `AlexNet` |    57M   |   62.5%    |    83.0%   |      √      |
 
 
 
