@@ -44,8 +44,8 @@ parser.add_argument('data', metavar='DIR', default='data',
                     help='path to dataset')
 parser.add_argument('-a', '--arch', metavar='ARCH', default='alexnet',
                     help='model architecture (default: alexnet)')
-parser.add_argument('-j', '--workers', default=1, type=int, metavar='N',
-                    help='number of data loading workers (default: 1)')
+parser.add_argument('-j', '--workers', default=0, type=int, metavar='N',
+                    help='number of data loading workers (default: 0)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
@@ -199,6 +199,7 @@ def main_worker(gpu, ngpus_per_node, args):
                                 weight_decay=args.weight_decay)
 
     model, optimizer = amp.initialize(model, optimizer, opt_level=args.opt_level)
+    print(model)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -388,7 +389,7 @@ def validate(val_loader, model, criterion, args):
 def save_checkpoint(state, is_best, filename='checkpoint.pth'):
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, f"{args.arch}.pth")
+        shutil.copyfile(filename, "model_best.pth")
 
 
 class AverageMeter(object):
