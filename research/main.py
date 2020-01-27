@@ -38,7 +38,6 @@ import torchvision.transforms as transforms
 
 from apex import amp
 from alexnet import AlexNet
-# from visdom import Visdom
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR', default='data',
@@ -87,19 +86,20 @@ parser.add_argument('--gpu', default=0, type=int,
                     help='GPU id to use.')
 parser.add_argument('--image_size', default=224, type=int,
                     help='image size')
-parser.add_argument('--num_classes', type=int, default=196,
+parser.add_argument('--num_classes', type=int, default=1000,
                     help="number of dataset category.")
 parser.add_argument('--multiprocessing-distributed', action='store_true',
                     help='Use multi-processing distributed training to launch '
                          'N processes per node, which has N GPUs. This is the '
                          'fastest way to use PyTorch for either single node or '
                          'multi node data parallel training')
-
+args = parser.parse_args()
 best_acc1 = 0
 
 
 def main():
-    args = parser.parse_args()
+    #args = parser.parse_args()
+
 
     if args.seed is not None:
         random.seed(args.seed)
@@ -185,8 +185,11 @@ def main_worker(gpu, ngpus_per_node, args):
     else:
         # DataParallel will divide and allocate batch_size to all available
         # GPUs
-        model.features = torch.nn.DataParallel(model.features)
-        model.cuda()
+        if args.arch.startswith('alexnet'):
+            model.features = torch.nn.DataParallel(model.features)
+            model.cuda()
+        else:
+            model = torch.nn.DataParallel(model).cuda()
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(args.gpu)
@@ -196,7 +199,6 @@ def main_worker(gpu, ngpus_per_node, args):
                                 weight_decay=args.weight_decay)
 
     model, optimizer = amp.initialize(model, optimizer, opt_level=args.opt_level)
-
     print(model)
 
     # optionally resume from a checkpoint
@@ -220,7 +222,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # Data loading code
     traindir = os.path.join(args.data, 'train')
-    testdir = os.path.join(args.data, 'test')
+    valdir = os.path.join(args.data, 'test')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
@@ -232,15 +234,6 @@ def main_worker(gpu, ngpus_per_node, args):
             transforms.ToTensor(),
             normalize,
         ]))
-    
-    test_dataset = datasets.ImageFolder(
-        testdir,
-        transform=transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            normalize,
-        ]))
 
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
@@ -248,15 +241,34 @@ def main_worker(gpu, ngpus_per_node, args):
         train_sampler = None
 
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True,
+        train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
         num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
-    test_loader = torch.utils.data.DataLoader(
-        test_dataset, batch_size=args.batch_size, shuffle=False,
+    if 'alexnet' in args.arch:
+        image_size = AlexNet.get_image_size(args.arch)
+        val_transforms = transforms.Compose([
+            transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
+            transforms.CenterCrop(image_size),
+            transforms.ToTensor(),
+            normalize,
+        ])
+        print('Using image size', image_size)
+    else:
+        val_transforms = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            normalize,
+        ])
+        print('Using image size', 224)
+
+    val_loader = torch.utils.data.DataLoader(
+        datasets.ImageFolder(valdir, val_transforms),
+        batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True)
 
     if args.evaluate:
-        top1 = validate(test_loader, model, criterion, args)
+        top1 = validate(val_loader, model, criterion, args)
         with open('res.txt', 'w') as f:
             print(f"Acc@1: {top1}", file=f)
         return
@@ -270,7 +282,7 @@ def main_worker(gpu, ngpus_per_node, args):
         train(train_loader, model, criterion, optimizer, epoch, args)
 
         # evaluate on validation set
-        acc1 = validate(test_loader, model, criterion, args)
+        acc1 = validate(val_loader, model, criterion, args)
 
         # remember best acc@1 and save checkpoint
         is_best = acc1 > best_acc1
@@ -300,9 +312,6 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     # switch to train mode
     model.train()
 
-    # viz = Visdom() 
-    # viz.line([[0., 0., 0.]], [0], win='train', opts=dict(title='loss&acc1&acc5', legend=["loss", "acc1", "acc5"]))
-    
     end = time.time()
     for i, (images, target) in enumerate(train_loader):
         # measure data loading time
@@ -321,8 +330,6 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         losses.update(loss.item(), images.size(0))
         top1.update(acc1[0], images.size(0))
         top5.update(acc5[0], images.size(0))
-       
-        # viz.line([[loss.item(), acc1[0], acc5[0]]], [epoch], win='train', update='append')
 
         # compute gradient and do Adam step
         optimizer.zero_grad()
@@ -338,12 +345,12 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             progress.print(i)
 
 
-def validate(test_loader, model, criterion, args):
+def validate(val_loader, model, criterion, args):
     batch_time = AverageMeter('Time', ':6.3f')
     losses = AverageMeter('Loss', ':4.4f')
     top1 = AverageMeter('Acc@1', ':6.2f')
     top5 = AverageMeter('Acc@5', ':6.2f')
-    progress = ProgressMeter(len(test_loader), batch_time, losses, top1, top5,
+    progress = ProgressMeter(len(val_loader), batch_time, losses, top1, top5,
                              prefix='Test: ')
 
     # switch to evaluate mode
@@ -351,7 +358,7 @@ def validate(test_loader, model, criterion, args):
 
     with torch.no_grad():
         end = time.time()
-        for i, (images, target) in enumerate(test_loader):
+        for i, (images, target) in enumerate(val_loader):
             if args.gpu is not None:
                 images = images.cuda(args.gpu, non_blocking=True)
             target = target.cuda(args.gpu, non_blocking=True)
@@ -450,6 +457,22 @@ def accuracy(output, target, topk=(1,)):
             correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
             res.append(correct_k.mul_(100.0 / batch_size))
         return res
+
+
+def get_parameter_number(model):
+    total_num = sum(p.numel() for p in model.parameters())
+    trainable_num = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Total parameters: {total_num / 1000000:.1f}M")
+    print(f"Trainable parameters: {trainable_num / 1000000:.1f}M")
+
+
+def print_state_dict(model):
+    print("----------------------------------------------------------")
+    print("|                    state dict pram                     |")
+    print("----------------------------------------------------------")
+    for param_tensor in model.state_dict():
+        print(param_tensor, '\t', model.state_dict()[param_tensor].size())
+    print("----------------------------------------------------------")
 
 
 if __name__ == '__main__':
