@@ -116,9 +116,9 @@ dmypy.json
 # datasets
 datasets
 examples/cifar/data
-examples/imagenet/train 
-examples/imagenet/test
-examples/imagenet/labels_map.txt
+examples/imagenet/data/train 
+examples/imagenet/data/test
+examples/imagenet/data/labels_map.txt
 research/data
 
 # IDE file
