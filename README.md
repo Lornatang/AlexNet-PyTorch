@@ -19,11 +19,12 @@ _Upcoming features_: In the next few days, you will be able to:
  
 ### Table of contents
 1. [About AlexNet](#about-alexnet)
-2. [Installation](#installation)
-3. [Usage](#usage)
+2. [Model Description](#model-description)
+3. [Installation](#installation)
+4. [Usage](#usage)
     * [Load pretrained models](#loading-pretrained-models)
     * [Example: Classify](#example-classification)
-4. [Contributing](#contributing) 
+5. [Contributing](#contributing) 
 
 ### About AlexNet
 
@@ -38,6 +39,16 @@ necessary to use much larger training sets. And indeed, the shortcomings of smal
 have been widely recognized (e.g., Pinto et al. [21]), but it has only recently become possible to collect labeled datasets with millions of images. The new larger datasets include LabelMe [23], which
 consists of hundreds of thousands of fully-segmented images, and ImageNet [6], which consists of
 over 15 million labeled high-resolution images in over 22,000 categories. 
+
+### Model Description
+
+AlexNet competed in the ImageNet Large Scale Visual Recognition Challenge on September 30, 2012. The network achieved a top-5 error of 15.3%, more than 10.8 percentage points lower than that of the runner up. The original paper's primary result was that the depth of the model was essential for its high performance, which was computationally expensive, but made feasible due to the utilization of graphics processing units (GPUs) during training.
+
+The 1-crop error rates on the imagenet dataset with the pretrained model are listed below.
+
+|Model structure|Top-1 error|Top-5 error|
+|:-------------:|:---------:|:---------:|
+|    alexnet    |   43.45   |   20.91   |
 
 ### Installation
 
@@ -64,17 +75,16 @@ from alexnet import AlexNet
 model = AlexNet.from_pretrained('alexnet')
 ```
 
-Details about the models are below: 
-
-|   *Name*   |*# Params*|*Top-1 Acc.*|*Top-5 Acc.*|*Pretrained?*|
-|:----------:|:--------:|:----------:|:----------:|:-----------:|
-|  `AlexNet` |    57M   |   62.5%    |    83.0%   |      √      |
-
-
-
 #### Example: Classification
 
 We assume that in your current directory, there is a `img.jpg` file and a `labels_map.txt` file (ImageNet class names). These are both included in `examples/simple`. 
+
+All pre-trained models expect input images normalized in the same way,
+i.e. mini-batches of 3-channel RGB images of shape `(3 x H x W)`, where `H` and `W` are expected to be at least `224`.
+The images have to be loaded in to a range of `[0, 1]` and then normalized using `mean = [0.485, 0.456, 0.406]`
+and `std = [0.229, 0.224, 0.225]`.
+
+Here's a sample execution.
 
 ```python
 import json
@@ -85,40 +95,48 @@ from PIL import Image
 
 from alexnet import AlexNet
 
-image_size = 224
-
 # Open image
-img = Image.open('panda.jpg')
+input_image = Image.open("img.jpg")
 
 # Preprocess image
-tfms = transforms.Compose([transforms.Resize(image_size), transforms.CenterCrop(image_size),
-                           transforms.ToTensor(),
-                           transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]), ])
-img = tfms(img).unsqueeze(0)
+preprocess = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
+input_tensor = preprocess(input_image)
+input_batch = input_tensor.unsqueeze(0)  # create a mini-batch as expected by the model
 
 # Load class names
-labels_map = json.load(open('labels_map.txt'))
+labels_map = json.load(open("labels_map.txt"))
 labels_map = [labels_map[str(i)] for i in range(1000)]
 
 # Classify with AlexNet
-print("=> loading checkpoint 'alexnet'.")
-model = AlexNet.from_pretrained('alexnet-e3')
-print("=> loaded checkpoint 'alexnet'.")
+model = AlexNet.from_pretrained("alexnet")
 model.eval()
+
+# move the input and model to GPU for speed if available
+if torch.cuda.is_available():
+    input_batch = input_batch.to("cuda")
+    model.to("cuda")
+
 with torch.no_grad():
-    logits = model(img)
+    logits = model(input_batch)
 preds = torch.topk(logits, k=5).indices.squeeze(0).tolist()
 
-print('-----')
+print("-----")
 for idx in preds:
     label = labels_map[idx]
     prob = torch.softmax(logits, dim=1)[0, idx].item()
-    print('{:<75} ({:.2f}%)'.format(label, prob * 100))
+    print(f"{label:<75} ({prob * 100:.2f}%)")
 ```
 
 #### ImageNet
 
 See `examples/imagenet` for details about evaluating on ImageNet.
+
+For more datasets result. Please see `research/README.md`.
 
 ### Contributing
 
