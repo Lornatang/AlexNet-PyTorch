@@ -93,13 +93,11 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                          'N processes per node, which has N GPUs. This is the '
                          'fastest way to use PyTorch for either single node or '
                          'multi node data parallel training')
-args = parser.parse_args()
 best_acc1 = 0
 
 
 def main():
-    #args = parser.parse_args()
-
+    args = parser.parse_args()
 
     if args.seed is not None:
         random.seed(args.seed)
