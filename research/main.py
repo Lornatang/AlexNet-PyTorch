@@ -136,7 +136,7 @@ def main_worker(gpu, ngpus_per_node, args):
     args.gpu = gpu
 
     if args.gpu is not None:
-        print("Use GPU: {} for training".format(args.gpu))
+        print(f"Use GPU: {args.gpu} for training!")
 
     if args.distributed:
         if args.dist_url == "env://" and args.rank == -1:
@@ -151,9 +151,9 @@ def main_worker(gpu, ngpus_per_node, args):
     if 'alexnet' in args.arch:  # NEW
         if args.pretrained:
             model = AlexNet.from_pretrained(args.arch, args.num_classes)
-            print("=> using pre-trained model '{}'".format(args.arch))
+            print(f"=> using pre-trained model '{args.arch}'")
         else:
-            print("=> creating model '{}'".format(args.arch))
+            print(f"=> creating model '{args.arch}'")
             model = AlexNet.from_name(args.arch)
     else:
         warnings.warn("Plesase --arch alexnet.")
