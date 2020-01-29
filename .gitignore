@@ -118,6 +118,7 @@ datasets
 examples/cifar/data
 examples/imagenet/data/train 
 examples/imagenet/data/test
+examples/imagenet/data/val
 examples/imagenet/data/labels_map.txt
 research/data
 

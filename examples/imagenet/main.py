@@ -21,6 +21,7 @@ import os
 import random
 import shutil
 import time
+import hashlib
 import warnings
 
 import PIL
@@ -93,13 +94,11 @@ parser.add_argument('--multiprocessing-distributed', action='store_true',
                          'N processes per node, which has N GPUs. This is the '
                          'fastest way to use PyTorch for either single node or '
                          'multi node data parallel training')
-args = parser.parse_args()
 best_acc1 = 0
 
 
 def main():
-    #args = parser.parse_args()
-
+    args = parser.parse_args()
 
     if args.seed is not None:
         random.seed(args.seed)
@@ -199,13 +198,13 @@ def main_worker(gpu, ngpus_per_node, args):
                                 weight_decay=args.weight_decay)
 
     model, optimizer = amp.initialize(model, optimizer, opt_level=args.opt_level)
-    print(model)
 
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
             print(f"=> loading checkpoint '{args.resume}'")
             checkpoint = torch.load(args.resume)
+            compress_model(checkpoint, filename=args.resume)
             args.start_epoch = checkpoint['epoch']
             best_acc1 = checkpoint['best_acc1']
             if args.gpu is not None:
@@ -222,7 +221,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # Data loading code
     traindir = os.path.join(args.data, 'train')
-    valdir = os.path.join(args.data, 'test')
+    valdir = os.path.join(args.data, 'val')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
@@ -459,20 +458,30 @@ def accuracy(output, target, topk=(1,)):
         return res
 
 
-def get_parameter_number(model):
-    total_num = sum(p.numel() for p in model.parameters())
-    trainable_num = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f"Total parameters: {total_num / 1000000:.1f}M")
-    print(f"Trainable parameters: {trainable_num / 1000000:.1f}M")
+def cal_file_md5(filename):
+    """ Calculates the MD5 value of the file
+    Args:
+        filename: The path name of the file.
+
+    Return:
+        The MD5 value of the file.
+
+    """
+    with open(filename, "rb") as f:
+        md5 = hashlib.md5()
+        md5.update(f.read())
+        hash_value = md5.hexdigest()
+    return hash_value
 
 
-def print_state_dict(model):
-    print("----------------------------------------------------------")
-    print("|                    state dict pram                     |")
-    print("----------------------------------------------------------")
-    for param_tensor in model.state_dict():
-        print(param_tensor, '\t', model.state_dict()[param_tensor].size())
-    print("----------------------------------------------------------")
+def compress_model(state, filename):
+    model_folder = "../checkpoints"
+    try:
+        os.makedirs(model_folder)
+    except OSError:
+        pass
+    new_filename = filename[:-4] + "-" + cal_file_md5(filename)[:8] + ".pth"
+    torch.save(state["state_dict"], os.path.join(model_folder, new_filename))
 
 
 if __name__ == '__main__':
