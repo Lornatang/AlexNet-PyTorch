@@ -1,4 +1,4 @@
-# Copyright 2019 Lorna Authors. All Rights Reserved.
+# Copyright 2020 Lorna Authors. All Rights Reserved.
 # Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
@@ -43,8 +43,8 @@ from alexnet import AlexNet
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR', default='data',
                     help='path to dataset')
-parser.add_argument('-a', '--arch', metavar='ARCH', default='alexnet',
-                    help='model architecture (default: alexnet)')
+parser.add_argument('-a', '--arch', metavar='ARCH', default='alexnet-a2',
+                    help='model architecture (default: ``alexnet-a2``)')
 parser.add_argument('-j', '--workers', default=0, type=int, metavar='N',
                     help='number of data loading workers (default: 0)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
@@ -137,7 +137,7 @@ def main_worker(gpu, ngpus_per_node, args):
     args.gpu = gpu
 
     if args.gpu is not None:
-        print("Use GPU: {} for training".format(args.gpu))
+        print(f"Use GPU: {args.gpu} for training!")
 
     if args.distributed:
         if args.dist_url == "env://" and args.rank == -1:
@@ -152,9 +152,9 @@ def main_worker(gpu, ngpus_per_node, args):
     if 'alexnet' in args.arch:  # NEW
         if args.pretrained:
             model = AlexNet.from_pretrained(args.arch, args.num_classes)
-            print("=> using pre-trained model '{}'".format(args.arch))
+            print(f"=> using pre-trained model '{args.arch}'")
         else:
-            print("=> creating model '{}'".format(args.arch))
+            print(f"=> creating model '{args.arch}'")
             model = AlexNet.from_name(args.arch)
     else:
         warnings.warn("Plesase --arch alexnet.")
