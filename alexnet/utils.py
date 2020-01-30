@@ -80,8 +80,8 @@ def get_model_params(model_name, override_params):
 
 
 url_map = {
-    "alexnet-a0": "https://raw.githubusercontent.com/Lornatang/models/master/alexnet/alexnet-a0-7f0d7669.pth",
-    "alexnet-a1": "https://raw.githubusercontent.com/Lornatang/models/master/alexnet/alexnet-a1-aed0662f.pth",
+    "alexnet-a0": "https://github.com/Lornatang/models/raw/master/alexnet/alexnet-a0-7f0d7669.pth",
+    "alexnet-a1": "https://github.com/Lornatang/models/raw/master/alexnet/alexnet-a1-aed0662f.pth",
 }
 
 
