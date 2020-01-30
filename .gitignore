@@ -113,15 +113,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# datasets
-datasets
-examples/cifar/data
-examples/imagenet/data/train 
-examples/imagenet/data/test
-examples/imagenet/data/val
-examples/imagenet/data/labels_map.txt
-research/data
-
 # IDE file
 .idea
 .vscode
@@ -129,9 +120,11 @@ research/data
 # Mac file
 .DS_Store
 
-# Model file
-*.pth
-
-
-# API file
-static/
+# custom
+datasets
+examples/cifar/data
+examples/imagenet/data/train 
+examples/imagenet/data/test
+examples/imagenet/data/val
+examples/imagenet/data/labels_map.txt
+research/data
