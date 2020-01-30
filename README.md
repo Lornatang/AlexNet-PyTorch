@@ -88,6 +88,7 @@ Here's a sample execution.
 
 ```python
 import json
+import urllib
 
 import torch
 import torchvision.transforms as transforms
@@ -95,8 +96,13 @@ from PIL import Image
 
 from alexnet import AlexNet
 
-# Open image
-input_image = Image.open("img.jpg")
+# Download an example image from the models website
+url, filename = ("https://github.com/lornatang/models/raw/master/dog.jpg", "dog.jpg")
+try: 
+    urllib.URLopener().retrieve(url, filename)
+except: 
+    urllib.request.urlretrieve(url, filename)
+input_image = Image.open(filename)
 
 # Preprocess image
 preprocess = transforms.Compose([
@@ -108,12 +114,17 @@ preprocess = transforms.Compose([
 input_tensor = preprocess(input_image)
 input_batch = input_tensor.unsqueeze(0)  # create a mini-batch as expected by the model
 
-# Load class names
-labels_map = json.load(open("labels_map.txt"))
+# Download an imagenet labels from the models website
+url, filename = ("https://github.com/lornatang/models/raw/master/labels_map.txt", "labels_map.txt")
+try: 
+    urllib.URLopener().retrieve(url, filename)
+except: 
+    urllib.request.urlretrieve(url, filename)
+labels_map = json.load(open(filename))
 labels_map = [labels_map[str(i)] for i in range(1000)]
 
 # Classify with AlexNet
-model = AlexNet.from_pretrained("alexnet")
+model = AlexNet.from_pretrained("alexnet-a1")
 model.eval()
 
 # move the input and model to GPU for speed if available
