@@ -25,7 +25,7 @@ from PIL import Image
 from alexnet import AlexNet
 
 # Open image
-input_image = Image.open("img.jpg")
+input_image = Image.open(filename)
 
 # Preprocess image
 preprocess = transforms.Compose([
@@ -42,7 +42,7 @@ labels_map = json.load(open("labels_map.txt"))
 labels_map = [labels_map[str(i)] for i in range(1000)]
 
 # Classify with AlexNet
-model = AlexNet.from_pretrained("alexnet")
+model = AlexNet.from_pretrained("alexnet-a1")
 model.eval()
 
 # move the input and model to GPU for speed if available
