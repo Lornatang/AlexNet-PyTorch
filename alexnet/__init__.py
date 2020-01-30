@@ -15,5 +15,3 @@
 __version__ = "0.5.0"
 
 from .model import AlexNet
-from .utils import alexnet_params
-from .utils import load_pretrained_weights

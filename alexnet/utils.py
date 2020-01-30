@@ -22,9 +22,10 @@ import torch.utils.model_zoo as model_zoo
 
 
 # Parameters for the entire model (stem, all blocks, and head)
-GlobalParams = collections.namedtuple('GlobalParams', [
-    'batch_norm_momentum', 'batch_norm_epsilon', 'dropout_rate',
-    'image_size', 'num_classes'])
+GlobalParams = collections.namedtuple("GlobalParams", [
+    "avg_size", "classifier_size", "batch_norm_momentum",
+    "batch_norm_epsilon", "dropout_rate", "image_size",
+    "num_classes"])
 
 # Change namedtuple defaults
 GlobalParams.__new__.__defaults__ = (None,) * len(GlobalParams._fields)
@@ -38,21 +39,24 @@ GlobalParams.__new__.__defaults__ = (None,) * len(GlobalParams._fields)
 def alexnet_params(model_name):
     """ Map AlexNet model name to parameter coefficients. """
     params_dict = {
-        # Coefficients: res,dropout
-        'alexnet':  (224, 0.2),
+        # Coefficients: avgpool_size, classifier_size, dropout, res
+        "alexnet-a0":  (1,  512, 0.1,  32),
+        "alexnet-a1":  (6, 4096, 0.2, 224),
     }
     return params_dict[model_name]
 
 
-def alexnet(dropout_rate=None, image_size=None, num_classes=1000):
+def alexnet(avg_size=None, classifier_size=None, dropout_rate=None, image_size=None, num_classes=1000):
     """ Creates a alexnet model. """
 
     global_params = GlobalParams(
+        avg_size=avg_size,
         batch_norm_momentum=0.99,
         batch_norm_epsilon=1e-3,
+        classifier_size=classifier_size,
         dropout_rate=dropout_rate,
-        num_classes=num_classes,
         image_size=image_size,
+        num_classes=num_classes,
     )
 
     return global_params
@@ -60,12 +64,15 @@ def alexnet(dropout_rate=None, image_size=None, num_classes=1000):
 
 def get_model_params(model_name, override_params):
     """ Get the block args and global params for a given model """
-    if model_name.startswith('alexnet'):
-        s, p = alexnet_params(model_name)
+    if model_name.startswith("alexnet"):
+        a, c, p, s = alexnet_params(model_name)
         # note: all models have drop connect rate = 0.2
-        global_params = alexnet(dropout_rate=p, image_size=s)
+        if s == 32:
+            global_params = alexnet(avg_size=a, classifier_size=c, dropout_rate=p, image_size=s, num_classes=10)
+        else:
+            global_params = alexnet(avg_size=a, classifier_size=c, dropout_rate=p, image_size=s)
     else:
-        raise NotImplementedError(f"model name is not pre-defined: {model_name}.")
+        raise NotImplementedError(f"Model name is not pre-defined: {model_name}.")
     if override_params:
         # ValueError will be raised here if override_params has fields not included in global_params.
         global_params = global_params._replace(**override_params)
@@ -73,7 +80,8 @@ def get_model_params(model_name, override_params):
 
 
 url_map = {
-    'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
+    "alexnet-a0": "https://raw.githubusercontent.com/Lornatang/models/master/alexnet/alexnet-a0-7f0d7669.pth",
+    "alexnet-a1": "https://raw.githubusercontent.com/Lornatang/models/master/alexnet/alexnet-a1-aed0662f.pth",
 }
 
 
@@ -83,9 +91,9 @@ def load_pretrained_weights(model, model_name, load_fc=True):
     if load_fc:
         model.load_state_dict(state_dict)
     else:
-        state_dict.pop('classifier.6.weight')
-        state_dict.pop('classifier.6.bias')
+        state_dict.pop("classifier.6.weight")
+        state_dict.pop("classifier.6.bias")
         res = model.load_state_dict(state_dict, strict=False)
         assert set(res.missing_keys) == set(
-            ['classifier.6.weight', 'classifier.6.bias']), 'issue loading pretrained weights'
+            ["classifier.6.weight", "classifier.6.bias"]), "issue loading pretrained weights"
     print(f"Loaded pretrained weights for {model_name}")
