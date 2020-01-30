@@ -46,9 +46,9 @@ AlexNet competed in the ImageNet Large Scale Visual Recognition Challenge on Sep
 
 The 1-crop error rates on the imagenet dataset with the pretrained model are listed below.
 
-|Model structure|Top-1 error|Top-5 error|
-|:-------------:|:---------:|:---------:|
-|    alexnet    |   44.59   |   21.60   |
+|Model structure|*Top-1 error*|*Top-5 error*|
+|:-------------:|:-----------:|:-----------:|
+|    alexnet    |    44.59    |    21.60    |
 
 ### Installation
 
