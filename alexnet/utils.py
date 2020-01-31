@@ -40,8 +40,7 @@ def alexnet_params(model_name):
     """ Map AlexNet model name to parameter coefficients. """
     params_dict = {
         # Coefficients: avgpool_size, classifier_size, dropout, res
-        "alexnet-a0":  (1,  512, 0.1,  32),
-        "alexnet-a1":  (6, 4096, 0.2, 224),
+        "alexnet":  (6, 4096, 0.2, 224),
     }
     return params_dict[model_name]
 
@@ -77,8 +76,7 @@ def get_model_params(model_name, override_params):
 
 
 url_map = {
-    "alexnet-a0": "https://github.com/Lornatang/models/raw/master/alexnet/alexnet-a0-8e12ce6b.pth",
-    "alexnet-a1": "https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth",
+    "alexnet": "https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth",
 }
 
 
