@@ -72,13 +72,8 @@ class AlexNet(nn.Module):
                 layers.append(nn.MaxPool2d(kernel_size=3, stride=2))
             return layers
 
-        if self.image_size == 32:
-            preprocess = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1)
-        else:
-            preprocess = nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2)
-
         self.features = nn.Sequential(
-            preprocess,
+            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2),
             *block(64, 192, kernel_size=5, padding=2),
@@ -112,8 +107,6 @@ class AlexNet(nn.Module):
 
     @classmethod
     def from_pretrained(cls, model_name, num_classes=1000):
-        if model_name == "alexnet-a0":
-            num_classes = 10
         model = cls.from_name(model_name, override_params={"num_classes": num_classes})
         load_pretrained_weights(model, model_name, load_fc=(num_classes == 1000 or num_classes == 10))
         return model
@@ -128,7 +121,5 @@ class AlexNet(nn.Module):
     def _check_model_name_is_valid(cls, model_name):
         """ Validates model name. None that pretrained weights are only available for
         the first four models (alexnet) at the moment. """
-        valid_list = ["a0", "a1"]
-        valid_models = ["alexnet-" + str(i) for i in valid_list]
-        if model_name not in valid_models:
+        if model_name not in "alexnet":
             raise ValueError("model_name should be one of: " + ", ".join(valid_models))
