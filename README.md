@@ -66,13 +66,13 @@ pip install -e .
 Load an AlexNet:  
 ```python
 from alexnet import AlexNet
-model = AlexNet()
+model = AlexNet.from_name('alexnet-a1')
 ```
 
 Load a pretrained AlexNet: 
 ```python
 from alexnet import AlexNet
-model = AlexNet.from_pretrained('alexnet')
+model = AlexNet.from_pretrained('alexnet-a1')
 ```
 
 #### Example: Classification
