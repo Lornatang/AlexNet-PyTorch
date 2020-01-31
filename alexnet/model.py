@@ -114,11 +114,10 @@ class AlexNet(nn.Module):
 
     @classmethod
     def from_pretrained(cls, model_name, num_classes=1000):
+        if model_name == "alexnet-a0":
+            num_classes = 10
         model = cls.from_name(model_name, override_params={"num_classes": num_classes})
-        load_fc = False
-        if num_classes == 1000 or num_classes == 10:
-            load_fc = True
-        load_pretrained_weights(model, model_name, load_fc=load_fc)
+        load_pretrained_weights(model, model_name, load_fc=(num_classes == 1000 or num_classes == 10))
         return model
 
     @classmethod
