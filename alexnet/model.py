@@ -72,8 +72,6 @@ class AlexNet(nn.Module):
                 layers.append(nn.MaxPool2d(kernel_size=3, stride=2))
             return layers
 
-        preprocess = []
-
         if self.image_size == 32:
             preprocess = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1)
         else:
@@ -134,4 +132,3 @@ class AlexNet(nn.Module):
         valid_models = ["alexnet-" + str(i) for i in valid_list]
         if model_name not in valid_models:
             raise ValueError("model_name should be one of: " + ", ".join(valid_models))
-
