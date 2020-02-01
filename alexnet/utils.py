@@ -39,20 +39,18 @@ GlobalParams.__new__.__defaults__ = (None,) * len(GlobalParams._fields)
 def alexnet_params(model_name):
     """ Map AlexNet model name to parameter coefficients. """
     params_dict = {
-        # Coefficients: avgpool_size, classifier_size, dropout, res
-        "alexnet":  (6, 4096, 0.2, 224),
+        # Coefficients: dropout, res
+        "alexnet":  (0.2, 224),
     }
     return params_dict[model_name]
 
 
-def alexnet(avg_size=None, classifier_size=None, dropout_rate=None, image_size=None, num_classes=1000):
+def alexnet(dropout_rate, image_size, num_classes=1000):
     """ Creates a alexnet model. """
 
     global_params = GlobalParams(
-        avg_size=avg_size,
         batch_norm_momentum=0.99,
         batch_norm_epsilon=1e-3,
-        classifier_size=classifier_size,
         dropout_rate=dropout_rate,
         image_size=image_size,
         num_classes=num_classes,
@@ -64,9 +62,8 @@ def alexnet(avg_size=None, classifier_size=None, dropout_rate=None, image_size=N
 def get_model_params(model_name, override_params):
     """ Get the block args and global params for a given model """
     if model_name.startswith("alexnet"):
-        a, c, p, s = alexnet_params(model_name)
-        # note: all models have drop connect rate = 0.2
-        global_params = alexnet(avg_size=a, classifier_size=c, dropout_rate=p, image_size=s)
+        p, s = alexnet_params(model_name)
+        global_params = alexnet(dropout_rate=p, image_size=s)
     else:
         raise NotImplementedError(f"Model name is not pre-defined: {model_name}.")
     if override_params:

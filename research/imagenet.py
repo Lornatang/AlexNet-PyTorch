@@ -43,8 +43,8 @@ from alexnet import AlexNet
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR', default='data',
                     help='path to dataset')
-parser.add_argument('-a', '--arch', metavar='ARCH', default='alexnet-a1',
-                    help='model architecture (default: alexnet-a1)')
+parser.add_argument('-a', '--arch', metavar='ARCH', default='alexnet',
+                    help='model architecture (default: alexnet)')
 parser.add_argument('-j', '--workers', default=0, type=int, metavar='N',
                     help='number of data loading workers (default: 0)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
@@ -85,8 +85,6 @@ parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--gpu', default=0, type=int,
                     help='GPU id to use.')
-parser.add_argument('--image_size', default=224, type=int,
-                    help='image size')
 parser.add_argument('--num_classes', type=int, default=1000,
                     help="number of dataset category.")
 parser.add_argument('--multiprocessing-distributed', action='store_true',
@@ -228,7 +226,7 @@ def main_worker(gpu, ngpus_per_node, args):
     train_dataset = datasets.ImageFolder(
         traindir,
         transform=transforms.Compose([
-            transforms.RandomResizedCrop(args.image_size),
+            transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
