@@ -11,7 +11,7 @@ from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
 
-# Package meta-data.
+# Package meta-data
 NAME = 'alexnet'
 DESCRIPTION = 'AlexNet implements of PyTorch.'
 URL = 'https://github.com/lornatang/AlexNet-PyTorch'
