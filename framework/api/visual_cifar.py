@@ -12,12 +12,9 @@
 # limitations under the License.
 # ==============================================================================
 
-import base64
-import os
-import shutil
-import time
-import urllib.request
 import json
+import os
+import urllib.request
 
 import torch
 import torchvision.transforms as transforms
@@ -37,27 +34,47 @@ model.eval()
 
 
 def preprocess(filename, label):
-    input_image = Image.open(filename)
+  input_image = Image.open(filename)
 
-    transform = transforms.Compose([
-        transforms.Resize(36),
-        transforms.CenterCrop(24),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
+  transform = transforms.Compose([
+    transforms.Resize(36),
+    transforms.CenterCrop(24),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+  ])
 
-    input_tensor = transform(input_image)
-    # create a mini-batch as expected by the model
-    input_batch = input_tensor.unsqueeze(0)
+  input_tensor = transform(input_image)
+  # create a mini-batch as expected by the model
+  input_batch = input_tensor.unsqueeze(0)
 
-    labels_map = json.load(open(label))
-    labels_map = [labels_map[str(i)] for i in range(1000)]
-    return input_batch, labels_map
+  labels_map = json.load(open(label))
+  labels_map = [labels_map[str(i)] for i in range(1000)]
+  return input_batch, labels_map
 
 
 def index(request):
-    """Get the image based on the base64 encoding or url address
-            and do the pencil style conversion
+  """Get the image based on the base64 encoding or url address
+          and do the pencil style conversion
+  Args:
+      request: Post request in url.
+      - image_code: 64-bit encoding of images.
+      - url:        The URL of the image.
+
+  Return:
+      Base64 bit encoding of the image.
+
+  Notes:
+      Later versions will not contexturn an image's address,
+      but instead a base64-bit encoded address
+  """
+  return render(request, "index.html")
+
+
+class CIFAR(APIView):
+
+  @staticmethod
+  def get(request):
+    """ Get the image based on the base64 encoding or url address
     Args:
         request: Post request in url.
         - image_code: 64-bit encoding of images.
@@ -70,90 +87,72 @@ def index(request):
         Later versions will not contexturn an image's address,
         but instead a base64-bit encoded address
     """
-    return render(request, "index.html")
+    base_path = "static/cifar"
 
+    try:
+      os.makedirs(base_path)
+    except OSError:
+      pass
 
-class CIFAR(APIView):
+    filename = os.path.join(base_path, "cifar.png")
+    if os.path.exists(filename):
+      os.remove(filename)
 
-    @staticmethod
-    def get(request):
-        """ Get the image based on the base64 encoding or url address
-        Args:
-            request: Post request in url.
-            - image_code: 64-bit encoding of images.
-            - url:        The URL of the image.
+    context = {
+      "status_code": 20000
+    }
+    return render(request, "cifar.html", context)
 
-        Return:
-            Base64 bit encoding of the image.
+  @staticmethod
+  def post(request):
+    """ Get the image based on the base64 encoding or url address
+    Args:
+        request: Post request in url.
+        - image_code: 64-bit encoding of images.
+        - url:        The URL of the image.
 
-        Notes:
-            Later versions will not contexturn an image's address,
-            but instead a base64-bit encoded address
-        """
-        base_path = "static/cifar"
+    Return:
+        Base64 bit encoding of the image.
 
-        try:
-            os.makedirs(base_path)
-        except OSError:
-            pass
+    Notes:
+        Later versions will not contexturn an image's address,
+        but instead a base64-bit encoded address
+    """
 
-        filename = os.path.join(base_path, "cifar.png")
-        if os.path.exists(filename):
-            os.remove(filename)
+    context = None
+    # Get the url for the image
+    url = request.POST.get("url")
+    base_path = "static/cifar"
+    data_path = "data"
 
-        context = {
-            "status_code": 20000
-        }
-        return render(request, "cifar.html", context)
+    try:
+      os.makedirs(base_path)
+    except OSError:
+      pass
 
-    @staticmethod
-    def post(request):
-        """ Get the image based on the base64 encoding or url address
-        Args:
-            request: Post request in url.
-            - image_code: 64-bit encoding of images.
-            - url:        The URL of the image.
+    filename = os.path.join(base_path, "cifar.png")
+    label = os.path.join(data_path, "labels_map_for_imagenet.txt")
 
-        Return:
-            Base64 bit encoding of the image.
+    image = urllib.request.urlopen(url)
+    with open(filename, "wb") as v:
+      v.write(image.read())
 
-        Notes:
-            Later versions will not contexturn an image's address,
-            but instead a base64-bit encoded address
-        """
-        # Get the url for the image
-        url = request.POST.get("url")
-        base_path = "static/cifar"
-        data_path = "data"
+    image, labels_map = preprocess(filename, label)
+    image = image.to(device)
 
-        try:
-            os.makedirs(base_path)
-        except OSError:
-            pass
+    with torch.no_grad():
+      logits = model(image)
+    preds = torch.topk(logits, k=1).indices.squeeze(0).tolist()
 
-        filename = os.path.join(base_path, "cifar.png")
-        label = os.path.join(data_path, "labels_map_for_imagenet.txt")
+    for idx in preds:
+      label = labels_map[idx]
+      probability = torch.softmax(logits, dim=1)[0, idx].item() * 100
+      probability = str(probability)[:5]
 
-        image = urllib.request.urlopen(url)
-        with open(filename, "wb") as v:
-            v.write(image.read())
-
-        image, labels_map = preprocess(filename, label)
-        image = image.to(device)
-
-        with torch.no_grad():
-            logits = model(image)
-        preds = torch.topk(logits, k=1).indices.squeeze(0).tolist()
-
-        for idx in preds:
-            label = labels_map[idx]
-            probability = torch.softmax(logits, dim=1)[0, idx].item() * 100
-            probability = str(probability)[:5]
-
-        context = {
-            "status_code": 20000,
-            "message": "OK",
-            "filename": filename,
-            "label": label,
-            "probability": probability}
-        return render(request, "cifar.html", context)
+      context = {
+        "status_code": 20000,
+        "message": "OK",
+        "filename": filename,
+        "label": label,
+        "probability": probability}
+    return render(request, "cifar.html", context)
