@@ -31,10 +31,10 @@ from api.visual_imagenet import index
 
 # noinspection PyInterpreter
 urlpatterns = [
-    url(r'^api/cifar.html', CIFAR.as_view(), name="AlexNet classifier CIFAR"),
-    url(r'^api/imagenet.html', IMAGENET.as_view(), name="AlexNet classifier IMAGENET"),
-    path('', index),
-    path('admin/', admin.site.urls),
-    url('index/', index, name="index"),
+  url(r'^api/cifar.html', CIFAR.as_view(), name="AlexNet classifier CIFAR"),
+  url(r'^api/imagenet.html', IMAGENET.as_view(), name="AlexNet classifier IMAGENET"),
+  path('', index),
+  path('admin/', admin.site.urls),
+  url('index/', index, name="index"),
 ]
 urlpatterns += staticfiles_urlpatterns()
