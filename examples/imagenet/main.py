@@ -39,7 +39,7 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 from apex import amp
 
-from alexnet import AlexNet
+from alexnet_pytorch import AlexNet
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR', default='data',

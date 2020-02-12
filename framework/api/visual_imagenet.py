@@ -22,11 +22,11 @@ from PIL import Image
 from django.shortcuts import render
 from rest_framework.views import APIView
 
-from alexnet import AlexNet
+from alexnet_pytorch import AlexNet
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-model = AlexNet.from_pretrained("alexnet-a1")
+model = AlexNet.from_pretrained("alexnet")
 # move the model to GPU for speed if available
 model = model.to(device)
 # switch to evaluate mode
