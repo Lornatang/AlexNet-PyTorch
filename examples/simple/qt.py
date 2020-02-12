@@ -8,11 +8,11 @@ from PIL import Image
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import *
 
-from alexnet import AlexNet
+from alexnet_pytorch import AlexNet
 
 
 parser = argparse.ArgumentParser("AlexNet Classifier Tool")
-parser.add_argument("-w", "--model_name", type=str, default='alexnet-e3',
+parser.add_argument("-w", "--model_name", type=str, default='alexnet',
                     help="Weight of the model loaded by default.")
 parser.add_argument("-s", "--image_size", type=int, default=None,
                     help="Size of classified image. (default=None).")
