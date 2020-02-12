@@ -1,4 +1,4 @@
-# AlexNet
+# AlexNet-PyTorch
 
 ### Update (January 15, 2020)
 
@@ -54,8 +54,8 @@ The 1-crop error rates on the imagenet dataset with the pretrained model are lis
 
 Install from source:
 ```bash
-git clone https://github.com/lornatang/AlexNet
-cd AlexNet
+git clone https://github.com/lornatang/AlexNet-PyTorch
+cd AlexNet-PyTorch
 pip install -e .
 ``` 
 
@@ -65,13 +65,13 @@ pip install -e .
 
 Load an AlexNet:  
 ```python
-from alexnet import AlexNet
+from alexnet_pytorch import AlexNet
 model = AlexNet.from_name('alexnet')
 ```
 
 Load a pretrained AlexNet: 
 ```python
-from alexnet import AlexNet
+from alexnet_pytorch import AlexNet
 model = AlexNet.from_pretrained('alexnet')
 ```
 
@@ -93,7 +93,7 @@ import torch
 import torchvision.transforms as transforms
 from PIL import Image
 
-from alexnet import AlexNet
+from alexnet_pytorch import AlexNet
 
 # Open image
 input_image = Image.open("img.jpg")
@@ -113,7 +113,7 @@ labels_map = json.load(open("labels_map.txt"))
 labels_map = [labels_map[str(i)] for i in range(1000)]
 
 # Classify with AlexNet
-model = AlexNet.from_pretrained("alexnet-a1")
+model = AlexNet.from_pretrained("alexnet")
 model.eval()
 
 # move the input and model to GPU for speed if available
