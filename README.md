@@ -2,12 +2,14 @@
 
 ### Update (Feb 13, 2020)
 
-The update is for easy expansion
+The update is for ease of use and deployment.
 
  * [Example: Export to ONNX](#example-export-to-onnx)
  * [Example: Extract features](#example-feature-extraction)
+ * [Example: Visual](#example-visual)
 
 It is also now incredibly simple to load a pretrained model with a new number of classes for transfer learning:
+
 ```python
 from alexnet_pytorch import AlexNet
 model = AlexNet.from_pretrained('alexnet', num_classes=10)
@@ -39,6 +41,7 @@ _Upcoming features_: In the next few days, you will be able to:
     * [Example: Classify](#example-classification)
     * [Example: Extract features](#example-feature-extraction)
     * [Example: Export to ONNX](#example-export-to-onnx)
+    * [Example: Visual](#example-visual)
 5. [Contributing](#contributing) 
 
 ### About AlexNet
@@ -175,6 +178,17 @@ dummy_input = torch.randn(16, 3, 224, 224)
 
 torch.onnx.export(model, dummy_input, "demo.onnx", verbose=True)
 ``` 
+
+#### Example: Visual
+
+```text
+cd $REPO$/framework
+python manage.py runserver
+```
+
+Then open the browser and type in the browser address [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
+
+Enjoy it.
 
 #### ImageNet
 
