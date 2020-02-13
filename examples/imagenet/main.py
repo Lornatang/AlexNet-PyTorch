@@ -250,6 +250,14 @@ def main_worker(gpu, ngpus_per_node, args):
     num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
   if 'alexnet' in args.arch:
+    val_transforms = transforms.Compose([
+      transforms.Resize(256),
+      transforms.CenterCrop(224),
+      transforms.ToTensor(),
+      normalize,
+    ])
+    print('Using image size', 224)
+  else:
     image_size = AlexNet.get_image_size(args.arch)
     val_transforms = transforms.Compose([
       transforms.Resize(image_size, interpolation=PIL.Image.BICUBIC),
@@ -258,14 +266,6 @@ def main_worker(gpu, ngpus_per_node, args):
       normalize,
     ])
     print('Using image size', image_size)
-  else:
-    val_transforms = transforms.Compose([
-      transforms.Resize(256),
-      transforms.CenterCrop(224),
-      transforms.ToTensor(),
-      normalize,
-    ])
-    print('Using image size', 224)
 
   val_loader = torch.utils.data.DataLoader(
     datasets.ImageFolder(valdir, val_transforms),
