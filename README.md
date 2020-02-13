@@ -48,7 +48,7 @@ The 1-crop error rates on the imagenet dataset with the pretrained model are lis
 
 |Model structure|*Top-1 error*|*Top-5 error*|
 |:-------------:|:-----------:|:-----------:|
-|    alexnet    |    44.59    |    21.60    |
+|    alexnet    |    43.48    |    20.93    |
 
 ### Installation
 

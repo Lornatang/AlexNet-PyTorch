@@ -24,7 +24,7 @@ VERSION = '0.1.0'
 REQUIRED = [
     'torch',
     'torchvision',
-    'pillow', 'apex'
+    'pillow',
 ]
 
 # What packages are optional?
