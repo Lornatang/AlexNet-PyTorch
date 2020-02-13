@@ -4,7 +4,7 @@
 
 The update is for easy expansion
 
- * [Example: Export to ONNX](#example-export)
+ * [Example: Export to ONNX](#example-to-onnx)
  * [Example: Extract features](#example-feature-extraction)
 
 It is also now incredibly simple to load a pretrained model with a new number of classes for transfer learning:
@@ -38,7 +38,7 @@ _Upcoming features_: In the next few days, you will be able to:
     * [Load pretrained models](#loading-pretrained-models)
     * [Example: Classify](#example-classification)
     * [Example: Extract features](#example-feature-extraction)
-    * [Example: Export to ONNX](#example-export)
+    * [Example: Export to ONNX](#example-to-onnx)
 5. [Contributing](#contributing) 
 
 ### About AlexNet
