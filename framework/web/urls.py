@@ -18,20 +18,15 @@ Do not delete this file unless you know how to refactor it!
 ====================================WARNING====================================
 """
 
+from api.visual_imagenet import IMAGENET
+from api.visual_imagenet import index
 from django.conf.urls import url
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path
 
-from api.visual_cifar import CIFAR
-from api.visual_cifar import index
-
-from api.visual_imagenet import IMAGENET
-from api.visual_imagenet import index
-
 # noinspection PyInterpreter
 urlpatterns = [
-  url(r'^api/cifar.html', CIFAR.as_view(), name="AlexNet classifier CIFAR"),
   url(r'^api/imagenet.html', IMAGENET.as_view(), name="AlexNet classifier IMAGENET"),
   path('', index),
   path('admin/', admin.site.urls),

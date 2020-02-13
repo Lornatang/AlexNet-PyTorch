@@ -14,6 +14,7 @@
 
 import json
 import os
+import ssl
 import urllib.request
 
 import torch
@@ -23,6 +24,16 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 
 from alexnet_pytorch import AlexNet
+
+# unable to download images problem
+try:
+  _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+  # Legacy Python that doesn't verify HTTPS certificates by default
+  pass
+else:
+  # Handle target environment that doesn't support HTTPS verification
+  ssl._create_default_https_context = _create_unverified_https_context
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -132,7 +143,7 @@ class IMAGENET(APIView):
       pass
 
     filename = os.path.join(base_path, "imagenet.png")
-    label = os.path.join(data_path, "labels_map_for_imagenet.txt")
+    label = os.path.join(data_path, "labels_map.txt")
 
     image = urllib.request.urlopen(url)
     with open(filename, "wb") as v:
