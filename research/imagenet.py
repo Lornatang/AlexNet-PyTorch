@@ -44,8 +44,8 @@ from alexnet_pytorch import AlexNet
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR', default='data',
                     help='path to dataset')
-parser.add_argument('-a', '--arch', metavar='ARCH', default='alexnet_pytorch',
-                    help='model architecture (default: alexnet_pytorch)')
+parser.add_argument('-a', '--arch', metavar='ARCH', default='alexnet',
+                    help='model architecture (default: alexnet)')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
