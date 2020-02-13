@@ -1,5 +1,18 @@
 # AlexNet-PyTorch
 
+### Update (Feb 13, 2020)
+
+The update is for easy expansion
+
+ * [Example: Export to ONNX](#example-export)
+ * [Example: Extract features](#example-feature-extraction)
+
+It is also now incredibly simple to load a pretrained model with a new number of classes for transfer learning:
+```python
+from alexnet_pytorch import AlexNet
+model = AlexNet.from_pretrained('alexnet', num_classes=10)
+``` 
+
 ### Update (January 15, 2020)
 
 This update allows you to use NVIDIA's Apex tool for accelerated training. By default choice `hybrid training precision` + `dynamic loss amplified` version, if you need to learn more and details about `apex` tools, please visit https://github.com/NVIDIA/apex.
@@ -24,6 +37,8 @@ _Upcoming features_: In the next few days, you will be able to:
 4. [Usage](#usage)
     * [Load pretrained models](#loading-pretrained-models)
     * [Example: Classify](#example-classification)
+    * [Example: Extract features](#example-feature-extraction)
+    * [Example: Export to ONNX](#example-export)
 5. [Contributing](#contributing) 
 
 ### About AlexNet
@@ -131,6 +146,35 @@ for idx in preds:
   prob = torch.softmax(logits, dim=1)[0, idx].item()
   print(f"{label:<75} ({prob * 100:.2f}%)")
 ```
+
+#### Example: Feature Extraction 
+
+You can easily extract features with `model.extract_features`:
+```python
+import torch
+from alexnet_pytorch import AlexNet
+model = AlexNet.from_pretrained('alexnet')
+
+# ... image preprocessing as in the classification example ...
+inputs = torch.randn(1, 3, 224, 224)
+print(inputs.shape) # torch.Size([1, 3, 224, 224])
+
+features = model.extract_features(inputs)
+print(features.shape) # torch.Size([1, 256, 6, 6])
+```
+
+#### Example: Export to ONNX  
+
+Exporting to ONNX for deploying to production is now simple: 
+```python
+import torch 
+from alexnet_pytorch import AlexNet
+
+model = AlexNet.from_pretrained('alexnet')
+dummy_input = torch.randn(16, 3, 224, 224)
+
+torch.onnx.export(model, dummy_input, "demo.onnx", verbose=True)
+``` 
 
 #### ImageNet
 

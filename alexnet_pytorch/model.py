@@ -66,6 +66,11 @@ class AlexNet(nn.Module):
       nn.Linear(4096, num_classes),
     )
 
+  def extract_features(self, inputs):
+    """ Returns output of the final convolution layer """
+    x = self.features(inputs)
+    return x
+
   def forward(self, x):
     x = self.features(x)
     x = self.avgpool(x)
