@@ -1,5 +1,13 @@
 # AlexNet-PyTorch
 
+### Update (Feb 16, 2020)
+
+Now you can install this library directly using pip!
+
+```text
+pip install --upgrade alexnet_pytorch
+```
+
 ### Update (Feb 13, 2020)
 
 The update is for ease of use and deployment.
@@ -186,7 +194,7 @@ cd $REPO$/framework
 python manage.py runserver
 ```
 
-Then open the browser and type in the browser address [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
+Then open the browser and type in the browser address [http://192.168.1.103:20000/](http://192.168.1.103:20000/).
 
 Enjoy it.
 

@@ -23,8 +23,6 @@ VERSION = '0.1.0'
 # What packages are required for this module to be executed?
 REQUIRED = [
     'torch',
-    'torchvision',
-    'pillow',
 ]
 
 # What packages are optional?
@@ -124,6 +122,7 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
     # $ setup.py publish support.
