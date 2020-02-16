@@ -78,6 +78,11 @@ The 1-crop error rates on the imagenet dataset with the pretrained model are lis
 
 ### Installation
 
+Install from pypi:
+```bash
+pip install alexnet_pytorch
+```
+
 Install from source:
 ```bash
 git clone https://github.com/lornatang/AlexNet-PyTorch
