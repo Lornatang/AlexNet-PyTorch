@@ -85,7 +85,7 @@ pip install alexnet_pytorch
 
 Install from source:
 ```bash
-git clone https://github.com/lornatang/AlexNet-PyTorch
+git clone https://github.com/lornatang/AlexNet-PyTorch.git
 cd AlexNet-PyTorch
 pip install -e .
 ``` 
