@@ -196,7 +196,7 @@ torch.onnx.export(model, dummy_input, "demo.onnx", verbose=True)
 
 ```text
 cd $REPO$/framework
-python manage.py runserver
+sh start.sh
 ```
 
 Then open the browser and type in the browser address [http://192.168.1.103:20000/](http://192.168.1.103:20000/).
