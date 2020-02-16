@@ -199,7 +199,7 @@ cd $REPO$/framework
 sh start.sh
 ```
 
-Then open the browser and type in the browser address [http://192.168.1.103:20000/](http://192.168.1.103:20000/).
+Then open the browser and type in the browser address [http://127.0.0.1:20000/](http://127.0.0.1:20000/).
 
 Enjoy it.
 
