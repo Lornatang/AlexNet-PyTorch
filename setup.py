@@ -14,7 +14,7 @@ from setuptools import find_packages, setup, Command
 # Package meta-data
 NAME = 'alexnet_pytorch'
 DESCRIPTION = 'AlexNet implements of PyTorch.'
-URL = 'https://github.com/lornatang/AlexNet-PyTorch'
+URL = 'https://github.com/Lornatang/AlexNet-PyTorch'
 EMAIL = 'liuchangyu1111@gmail.com'
 AUTHOR = 'Liu Changyu'
 REQUIRES_PYTHON = '>=3.5.0'
