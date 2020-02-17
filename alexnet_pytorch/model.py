@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
 import torch
 import torch.nn as nn
 
@@ -23,22 +22,20 @@ from .utils import load_pretrained_weights
 # AlexNet model architecture from the One weird trick...
 # <https://arxiv.org/abs/1404.5997>`_ paper.
 class AlexNet(nn.Module):
-  """ An AlexNet model. Most easily loaded with the .from_name or
-  .from_pretrained methods
+  r""" An AlexNet model. Most easily loaded with the .from_name or
+      .from_pretrained methods
 
   Args:
     global_params (namedtuple): A set of GlobalParams shared between blocks
 
-  Example:
+  Examples:
       model = AlexNet.from_pretrained("alexnet")
   """
 
   def __init__(self, global_params=None):
-    super().__init__()
-    self._global_params = global_params
-
-    dropout_rate = self._global_params.dropout_rate
-    num_classes = self._global_params.num_classes
+    super(AlexNet, self).__init__()
+    self.dropout_rate = global_params.dropout_rate
+    self.num_classes = global_params.num_classes
 
     self.features = nn.Sequential(
       nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
@@ -57,13 +54,13 @@ class AlexNet(nn.Module):
     )
     self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
     self.classifier = nn.Sequential(
-      nn.Dropout(p=dropout_rate),
+      nn.Dropout(p=self.dropout_rate),
       nn.Linear(256 * 6 * 6, 4096),
       nn.ReLU(inplace=True),
-      nn.Dropout(p=dropout_rate),
+      nn.Dropout(p=self.dropout_rate),
       nn.Linear(4096, 4096),
       nn.ReLU(inplace=True),
-      nn.Linear(4096, num_classes),
+      nn.Linear(4096, self.num_classes),
     )
 
     for m in self.modules():

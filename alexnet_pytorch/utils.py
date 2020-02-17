@@ -11,15 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
 import collections
 
 import torch.utils.model_zoo as model_zoo
 
 # Parameters for the entire model (stem, all blocks, and head)
 GlobalParams = collections.namedtuple("GlobalParams", [
-  "batch_norm_momentum", "batch_norm_epsilon", "dropout_rate",
-  "image_size", "num_classes"])
+  "batch_norm_momentum", "batch_norm_epsilon",
+  "dropout_rate", "image_size", "num_classes"])
 
 # Change namedtuple defaults
 GlobalParams.__new__.__defaults__ = (None,) * len(GlobalParams._fields)
@@ -60,6 +59,7 @@ def get_model_params(model_name, override_params):
     global_params = alexnet(dropout_rate=p, image_size=s)
   else:
     raise NotImplementedError(f"Model name is not pre-defined: {model_name}.")
+
   if override_params:
     # ValueError will be raised here if override_params has fields not included
     # in global_params.
@@ -83,5 +83,5 @@ def load_pretrained_weights(model, model_name, load_fc=True):
     res = model.load_state_dict(state_dict, strict=False)
     assert set(res.missing_keys) == {"classifier.6.weight",
                                      "classifier.6.bias"}, \
-      "issue loading pretrained weights"
+        "issue loading pretrained weights"
   print(f"Loaded pretrained weights for {model_name}")
