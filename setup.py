@@ -18,7 +18,7 @@ URL = 'https://github.com/lornatang/AlexNet-PyTorch'
 EMAIL = 'liuchangyu1111@gmail.com'
 AUTHOR = 'Liu Changyu'
 REQUIRES_PYTHON = '>=3.5.0'
-VERSION = '0.1.1'
+VERSION = '0.1.3'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
