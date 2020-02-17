@@ -11,9 +11,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
-"""
-====================================WARNING====================================
-Do not delete this file unless you know how to refactor it!
-====================================WARNING====================================
-"""

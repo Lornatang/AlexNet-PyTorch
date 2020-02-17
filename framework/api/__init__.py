@@ -11,10 +11,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-import os
-
-from django.core.wsgi import get_wsgi_application
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'web.settings')
-
-application = get_wsgi_application()
+from .visual_imagenet import IMAGENET
+from .visual_imagenet import index

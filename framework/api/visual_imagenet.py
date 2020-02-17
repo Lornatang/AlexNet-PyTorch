@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
 import json
 import os
 import ssl
@@ -64,20 +63,21 @@ def preprocess(filename, label):
 
 
 def index(request):
-  """Get the image based on the base64 encoding or url address
-          and do the pencil style conversion
+  r""" Get the image based on the base64 encoding or url address
+      and do the pencil style conversion
   Args:
-      request: Post request in url.
+    request: Post request in url.
       - image_code: 64-bit encoding of images.
       - url:        The URL of the image.
 
   Return:
-      Base64 bit encoding of the image.
+    Base64 bit encoding of the image.
 
   Notes:
-      Later versions will not contexturn an image's address,
-      but instead a base64-bit encoded address
+    Later versions will not contexturn an image's address,
+    but instead a base64-bit encoded address
   """
+
   return render(request, "index.html")
 
 
@@ -86,18 +86,20 @@ class IMAGENET(APIView):
   @staticmethod
   def get(request):
     """ Get the image based on the base64 encoding or url address
+
     Args:
-        request: Post request in url.
+      request: Post request in url.
         - image_code: 64-bit encoding of images.
         - url:        The URL of the image.
 
     Return:
-        Base64 bit encoding of the image.
+      Base64 bit encoding of the image.
 
     Notes:
-        Later versions will not contexturn an image's address,
-        but instead a base64-bit encoded address
+      Later versions will not contexturn an image's address,
+      but instead a base64-bit encoded address
     """
+
     base_path = "static/imagenet"
 
     try:
