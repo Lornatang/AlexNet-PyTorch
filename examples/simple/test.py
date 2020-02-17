@@ -12,11 +12,10 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Example
+"""
 In this simple example, we load an image, pre-process it, and classify it
 with a pretrained AlexNet.
 """
-
 import json
 
 import torch
