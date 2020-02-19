@@ -22,8 +22,7 @@ from .utils import load_pretrained_weights
 # AlexNet model architecture from the One weird trick...
 # <https://arxiv.org/abs/1404.5997>`_ paper.
 class AlexNet(nn.Module):
-  r""" An AlexNet model. Most easily loaded with the .from_name or
-      .from_pretrained methods
+  r""" An AlexNet model. Most easily loaded with the .from_name or .from_pretrained methods
 
   Args:
     global_params (namedtuple): A set of GlobalParams shared between blocks
@@ -34,8 +33,6 @@ class AlexNet(nn.Module):
 
   def __init__(self, global_params=None):
     super(AlexNet, self).__init__()
-    self.dropout_rate = global_params.dropout_rate
-    self.num_classes = global_params.num_classes
 
     self.features = nn.Sequential(
       nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
@@ -54,13 +51,13 @@ class AlexNet(nn.Module):
     )
     self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
     self.classifier = nn.Sequential(
-      nn.Dropout(p=self.dropout_rate),
+      nn.Dropout(global_params.dropout_rate),
       nn.Linear(256 * 6 * 6, 4096),
       nn.ReLU(inplace=True),
-      nn.Dropout(p=self.dropout_rate),
+      nn.Dropout(global_params.dropout_rate),
       nn.Linear(4096, 4096),
       nn.ReLU(inplace=True),
-      nn.Linear(4096, self.num_classes),
+      nn.Linear(4096, global_params.num_classes),
     )
 
     for m in self.modules():
@@ -80,8 +77,8 @@ class AlexNet(nn.Module):
     x = self.features(inputs)
     return x
 
-  def forward(self, x):
-    x = self.features(x)
+  def forward(self, inputs):
+    x = self.features(inputs)
     x = self.avgpool(x)
     x = torch.flatten(x, 1)
     x = self.classifier(x)
