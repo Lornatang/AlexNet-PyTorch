@@ -13,12 +13,12 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data
 NAME = 'alexnet_pytorch'
-DESCRIPTION = 'AlexNet implements of PyTorch.'
+DESCRIPTION = 'An improved version of the AlexNet model, adding parameter initialization from ResNet.'
 URL = 'https://github.com/Lornatang/AlexNet-PyTorch'
 EMAIL = 'liuchangyu1111@gmail.com'
 AUTHOR = 'Liu Changyu'
 REQUIRES_PYTHON = '>=3.5.0'
-VERSION = '0.1.3'
+VERSION = '0.1.5'
 
 # What packages are required for this module to be executed?
 REQUIRED = [

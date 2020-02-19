@@ -12,6 +12,6 @@
 # limitations under the License.
 # ==============================================================================
 
-__version__ = "0.1.3"
+__version__ = "0.1.5"
 
 from .model import AlexNet
