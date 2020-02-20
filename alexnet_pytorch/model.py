@@ -78,6 +78,7 @@ class AlexNet(nn.Module):
     return x
 
   def forward(self, inputs):
+    # See note [TorchScript super()]
     x = self.features(inputs)
     x = self.avgpool(x)
     x = torch.flatten(x, 1)
