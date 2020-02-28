@@ -5,7 +5,7 @@
 Now you can install this library directly using pip!
 
 ```text
-pip install --upgrade alexnet_pytorch
+pip3 install --upgrade alexnet_pytorch
 ```
 
 ### Update (Feb 13, 2020)
@@ -21,7 +21,7 @@ It is also now incredibly simple to load a pretrained model with a new number of
 ```python
 from alexnet_pytorch import AlexNet
 model = AlexNet.from_pretrained('alexnet', num_classes=10)
-``` 
+```
 
 ### Update (January 15, 2020)
 
@@ -39,7 +39,7 @@ At the moment, you can easily:
 _Upcoming features_: In the next few days, you will be able to:
  * Quickly finetune an AlexNet on your own dataset
  * Export AlexNet models for production
- 
+
 ### Table of contents
 1. [About AlexNet](#about-alexnet)
 2. [Model Description](#model-description)
@@ -88,7 +88,7 @@ Install from source:
 git clone https://github.com/lornatang/AlexNet-PyTorch.git
 cd AlexNet-PyTorch
 pip install -e .
-``` 
+```
 
 ### Usage
 
@@ -190,7 +190,7 @@ model = AlexNet.from_pretrained('alexnet')
 dummy_input = torch.randn(16, 3, 224, 224)
 
 torch.onnx.export(model, dummy_input, "demo.onnx", verbose=True)
-``` 
+```
 
 #### Example: Visual
 
