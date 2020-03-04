@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import *
 from alexnet_pytorch import AlexNet
 
 
-parser = argparse.ArgumentParser("AlexNet Classifier Tool")
+parser = argparse.ArgumentParser("AlexNet Classifier")
 parser.add_argument("-w", "--model_name", type=str, default='alexnet',
                     help="Weight of the model loaded by default.")
 parser.add_argument("-s", "--image_size", type=int, default=None,
