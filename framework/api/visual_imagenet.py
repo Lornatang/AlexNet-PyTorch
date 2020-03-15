@@ -13,7 +13,6 @@
 # ==============================================================================
 import json
 import os
-import ssl
 import urllib.request
 
 import torch
@@ -23,16 +22,6 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 
 from alexnet_pytorch import AlexNet
-
-# unable to download images problem
-try:
-  _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-  # Legacy Python that doesn't verify HTTPS certificates by default
-  pass
-else:
-  # Handle target environment that doesn't support HTTPS verification
-  ssl._create_default_https_context = _create_unverified_https_context
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -44,49 +33,27 @@ model.eval()
 
 
 def preprocess(filename, label):
-  input_image = Image.open(filename)
+    input_image = Image.open(filename)
 
-  transform = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-  ])
+    transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
 
-  input_tensor = transform(input_image)
-  # create a mini-batch as expected by the model
-  input_batch = input_tensor.unsqueeze(0)
+    input_tensor = transform(input_image)
+    # create a mini-batch as expected by the model
+    input_batch = input_tensor.unsqueeze(0)
 
-  labels_map = json.load(open(label))
-  labels_map = [labels_map[str(i)] for i in range(1000)]
-  return input_batch, labels_map
+    labels_map = json.load(open(label))
+    labels_map = [labels_map[str(i)] for i in range(1000)]
+    return input_batch, labels_map
 
 
 def index(request):
-  r""" Get the image based on the base64 encoding or url address
-      and do the pencil style conversion
-  Args:
-    request: Post request in url.
-      - image_code: 64-bit encoding of images.
-      - url:        The URL of the image.
-
-  Return:
-    Base64 bit encoding of the image.
-
-  Notes:
-    Later versions will not contexturn an image's address,
-    but instead a base64-bit encoded address
-  """
-
-  return render(request, "index.html")
-
-
-class IMAGENET(APIView):
-
-  @staticmethod
-  def get(request):
-    """ Get the image based on the base64 encoding or url address
-
+    r""" Get the image based on the base64 encoding or url address
+        and do the pencil style conversion
     Args:
       request: Post request in url.
         - image_code: 64-bit encoding of images.
@@ -100,73 +67,95 @@ class IMAGENET(APIView):
       but instead a base64-bit encoded address
     """
 
-    base_path = "static/imagenet"
+    return render(request, "index.html")
 
-    try:
-      os.makedirs(base_path)
-    except OSError:
-      pass
 
-    filename = os.path.join(base_path, "imagenet.png")
-    if os.path.exists(filename):
-      os.remove(filename)
+class IMAGENET(APIView):
 
-    context = {
-      "status_code": 20000
-    }
-    return render(request, "imagenet.html", context)
+    @staticmethod
+    def get(request):
+        """ Get the image based on the base64 encoding or url address
 
-  @staticmethod
-  def post(request):
-    """ Get the image based on the base64 encoding or url address
-    Args:
-        request: Post request in url.
-        - image_code: 64-bit encoding of images.
-        - url:        The URL of the image.
+        Args:
+          request: Post request in url.
+            - image_code: 64-bit encoding of images.
+            - url:        The URL of the image.
 
-    Return:
-        Base64 bit encoding of the image.
+        Return:
+          Base64 bit encoding of the image.
 
-    Notes:
-        Later versions will not contexturn an image's address,
-        but instead a base64-bit encoded address
-    """
+        Notes:
+          Later versions will not contexturn an image's address,
+          but instead a base64-bit encoded address
+        """
 
-    context = None
+        base_path = "static/imagenet"
 
-    # Get the url for the image
-    url = request.POST.get("url")
-    base_path = "static/imagenet"
-    data_path = "data"
+        try:
+            os.makedirs(base_path)
+        except OSError:
+            pass
 
-    try:
-      os.makedirs(base_path)
-    except OSError:
-      pass
+        filename = os.path.join(base_path, "imagenet.png")
+        if os.path.exists(filename):
+            os.remove(filename)
 
-    filename = os.path.join(base_path, "imagenet.png")
-    label = os.path.join(data_path, "labels_map.txt")
+        context = {
+            "status_code": 20000
+        }
+        return render(request, "imagenet.html", context)
 
-    image = urllib.request.urlopen(url)
-    with open(filename, "wb") as v:
-      v.write(image.read())
+    @staticmethod
+    def post(request):
+        """ Get the image based on the base64 encoding or url address
+        Args:
+            request: Post request in url.
+            - image_code: 64-bit encoding of images.
+            - url:        The URL of the image.
 
-    image, labels_map = preprocess(filename, label)
-    image = image.to(device)
+        Return:
+            Base64 bit encoding of the image.
 
-    with torch.no_grad():
-      logits = model(image)
-    preds = torch.topk(logits, k=1).indices.squeeze(0).tolist()
+        Notes:
+            Later versions will not contexturn an image's address,
+            but instead a base64-bit encoded address
+        """
 
-    for idx in preds:
-      label = labels_map[idx]
-      probability = torch.softmax(logits, dim=1)[0, idx].item() * 100
-      probability = str(probability)[:5]
+        context = None
 
-      context = {
-        "status_code": 20000,
-        "message": "OK",
-        "filename": filename,
-        "label": label,
-        "probability": probability}
-    return render(request, "imagenet.html", context)
+        # Get the url for the image
+        url = request.POST.get("url")
+        base_path = "static/imagenet"
+        data_path = "data"
+
+        try:
+            os.makedirs(base_path)
+        except OSError:
+            pass
+
+        filename = os.path.join(base_path, "imagenet.png")
+        label = os.path.join(data_path, "labels_map.txt")
+
+        image = urllib.request.urlopen(url)
+        with open(filename, "wb") as v:
+            v.write(image.read())
+
+        image, labels_map = preprocess(filename, label)
+        image = image.to(device)
+
+        with torch.no_grad():
+            logits = model(image)
+        preds = torch.topk(logits, k=1).indices.squeeze(0).tolist()
+
+        for idx in preds:
+            label = labels_map[idx]
+            probability = torch.softmax(logits, dim=1)[0, idx].item() * 100
+            probability = str(probability)[:5]
+
+            context = {
+                "status_code": 20000,
+                "message": "OK",
+                "filename": filename,
+                "label": label,
+                "probability": probability}
+        return render(request, "imagenet.html", context)

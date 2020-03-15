@@ -38,12 +38,14 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 import torchvision.transforms as transforms
 
+from alexnet_pytorch import AlexNet
+
+mixed_precision = True
 try:
     from apex import amp
-except ImportWarning:
+except:
+    mixed_precision = False
     warnings.warn("Warning: Apex tool not install.")
-
-from alexnet_pytorch import AlexNet
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR', default='data',
@@ -154,7 +156,7 @@ def main_worker(gpu, ngpus_per_node, args):
         dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
                                 world_size=args.world_size, rank=args.rank)
     # create model
-    if 'alexnet' in args.arch:  # NEW
+    if 'alexnet' in args.arch:
         if args.pretrained:
             model = AlexNet.from_pretrained(args.arch, args.num_classes)
             print(f"=> using pre-trained model '{args.arch}'")
@@ -207,14 +209,14 @@ def main_worker(gpu, ngpus_per_node, args):
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
 
-    model, optimizer = amp.initialize(model, optimizer, opt_level=args.opt_level)
+    if mixed_precision:
+        model, optimizer = amp.initialize(model, optimizer, opt_level=args.opt_level)
 
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
             print(f"=> loading checkpoint '{args.resume}'")
             checkpoint = torch.load(args.resume)
-            compress_model(checkpoint, filename=args.resume)
             args.start_epoch = checkpoint['epoch']
             best_acc1 = checkpoint['best_acc1']
             if args.gpu is not None:
@@ -342,8 +344,11 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
         # compute gradient and do Adam step
         optimizer.zero_grad()
-        with amp.scale_loss(loss, optimizer) as scaled_loss:
-            scaled_loss.backward()
+        if mixed_precision:
+            with amp.scale_loss(loss, optimizer) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss.backward()
         optimizer.step()
 
         # measure elapsed time
@@ -458,37 +463,11 @@ def accuracy(output, target, topk=(1,)):
         pred = pred.t()
         correct = pred.eq(target.view(1, -1).expand_as(pred))
 
-        res = []
+        result = []
         for k in topk:
             correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
-            res.append(correct_k.mul_(100.0 / batch_size))
-        return res
-
-
-def cal_file_md5(filename):
-    """ Calculates the MD5 value of the file
-    Args:
-        filename: The path name of the file.
-
-    Return:
-        The MD5 value of the file.
-
-    """
-    with open(filename, "rb") as f:
-        md5 = hashlib.md5()
-        md5.update(f.read())
-        hash_value = md5.hexdigest()
-    return hash_value
-
-
-def compress_model(state, filename):
-    model_folder = "../checkpoints"
-    try:
-        os.makedirs(model_folder)
-    except OSError:
-        pass
-    new_filename = filename[:-4] + "-" + cal_file_md5(filename)[:8] + ".pth"
-    torch.save(state["state_dict"], os.path.join(model_folder, new_filename))
+            result.append(correct_k.mul_(100.0 / batch_size))
+        return result
 
 
 if __name__ == '__main__':

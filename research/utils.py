@@ -11,18 +11,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-import hashlib
-import os
 import shutil
 import time
+import warnings
 
 import torch
 
+mixed_precision = True
 try:
     from apex import amp
-except ImportWarning:
-    import warnings
-
+except:
+    mixed_precision = False
     warnings.warn("Warning: Apex tool not install.")
 
 
@@ -59,8 +58,11 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
         # compute gradient and do Adam step
         optimizer.zero_grad()
-        with amp.scale_loss(loss, optimizer) as scaled_loss:
-            scaled_loss.backward()
+        if mixed_precision:
+            with amp.scale_loss(loss, optimizer) as scaled_loss:
+                scaled_loss.backward()
+        else:
+            loss.backward()
         optimizer.step()
 
         # measure elapsed time
@@ -180,29 +182,3 @@ def accuracy(output, target, topk=(1,)):
             correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
             res.append(correct_k.mul_(100.0 / batch_size))
         return res
-
-
-def cal_file_md5(filename):
-    """ Calculates the MD5 value of the file
-    Args:
-        filename: The path name of the file.
-
-    Return:
-        The MD5 value of the file.
-
-    """
-    with open(filename, "rb") as f:
-        md5 = hashlib.md5()
-        md5.update(f.read())
-        hash_value = md5.hexdigest()
-    return hash_value
-
-
-def compress_model(state, filename):
-    model_folder = "../checkpoints"
-    try:
-        os.makedirs(model_folder)
-    except OSError:
-        pass
-    new_filename = filename[:-4] + "-" + cal_file_md5(filename)[:8] + ".pth"
-    torch.save(state["state_dict"], os.path.join(model_folder, new_filename))

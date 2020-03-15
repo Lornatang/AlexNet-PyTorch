@@ -17,7 +17,7 @@ DESCRIPTION = 'An improved version of the AlexNet model, adding parameter initia
 URL = 'https://github.com/Lornatang/AlexNet-PyTorch'
 EMAIL = 'liuchangyu1111@gmail.com'
 AUTHOR = 'Liu Changyu'
-REQUIRES_PYTHON = '>=3.5.0'
+REQUIRES_PYTHON = '>=3.6.0'
 VERSION = '0.1.5'
 
 # What packages are required for this module to be executed?

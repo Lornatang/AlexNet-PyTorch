@@ -20,9 +20,9 @@ from django.urls import path
 
 # noinspection PyInterpreter
 urlpatterns = [
-  url(r'^api/imagenet.html', IMAGENET.as_view(), name="AlexNet classifier IMAGENET"),
-  path('', index),
-  path('admin/', admin.site.urls),
-  url('index/', index, name="index"),
+    url(r'^api/imagenet.html', IMAGENET.as_view(), name="AlexNet classifier IMAGENET"),
+    path('', index),
+    path('admin/', admin.site.urls),
+    url('index/', index, name="index"),
 ]
 urlpatterns += staticfiles_urlpatterns()

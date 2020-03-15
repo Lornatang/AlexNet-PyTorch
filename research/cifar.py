@@ -34,17 +34,18 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 import torchvision.transforms as transforms
 
-try:
-    from apex import amp
-except ImportWarning:
-    warnings.warn("Warning: Apex tool not install.")
-
 from alexnet_pytorch import AlexNet
 from .utils import adjust_learning_rate
-from .utils import compress_model
 from .utils import save_checkpoint
 from .utils import train
 from .utils import validate
+
+mixed_precision = True
+try:
+    from apex import amp
+except:
+    mixed_precision = False
+    warnings.warn("Warning: Apex tool not install.")
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR Training')
 parser.add_argument('data', metavar='DIR', default='data',
@@ -153,7 +154,7 @@ def main_worker(gpu, ngpus_per_node, args):
         dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
                                 world_size=args.world_size, rank=args.rank)
     # create model
-    if 'alexnet' in args.arch:  # NEW
+    if 'alexnet' in args.arch:
         if args.pretrained:
             model = AlexNet.from_pretrained(args.arch, args.num_classes)
             print(f"=> using pre-trained model '{args.arch}'")
@@ -205,15 +206,14 @@ def main_worker(gpu, ngpus_per_node, args):
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
-
-    model, optimizer = amp.initialize(model, optimizer, opt_level=args.opt_level)
+    if mixed_precision:
+        model, optimizer = amp.initialize(model, optimizer, opt_level=args.opt_level)
 
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
             print(f"=> loading checkpoint '{args.resume}'")
             checkpoint = torch.load(args.resume)
-            compress_model(checkpoint, filename=args.resume)
             args.start_epoch = checkpoint['epoch']
             best_acc1 = checkpoint['best_acc1']
             if args.gpu is not None:
