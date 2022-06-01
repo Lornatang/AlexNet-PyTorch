@@ -1,0 +1,24 @@
+# Mandatory - file path w.r.t project root.  This helps us with serving your model
+reqirements_file_path: requirements.txt
+# Mandatory - file path w.r.t project root.  This helps us with serving your model
+model_file_path: alexnet_pytorch/model.py
+# Mandatory - HTTP GET url to download pre-trained file.  Model must be directly downloadable from this url. 
+# OR local file path.  (In case of relative path, must be with respect to project root)
+pretrained_model_url: https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth
+# Optional - Description of your model in few lines
+description: AlexNet competed in the ImageNet Large Scale Visual Recognition Challenge on September 30, 2012. The network achieved a top-5 error of 15.3%, more than 10.8 percentage points lower than that of the runner up. The original paper's primary result was that the depth of the model was essential for its high performance, which was computationally expensive, but made feasible due to the utilization of graphics processing units (GPUs) during training. Current approaches to object recognition make essential use of machine learning methods. To improve their performance, we can collect larger datasets, learn more powerful models, and use better techniques for preventing overfitting.
+# Optional - Tags List - ex: Image Recognition, Object Detection, NLP, etc.,
+tags:
+  - Image Classification
+
+# Optional - Papers / Website / Article links to your model
+papers:
+  # https://arxiv.org
+  arxiv:
+  # Optional - https://paperswithcode.com/
+  papers_with_code:
+  # custom key
+  your_custom_key:
+
+
+

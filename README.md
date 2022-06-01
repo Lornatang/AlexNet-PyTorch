@@ -1,5 +1,9 @@
 # AlexNet-PyTorch
 
+<a href="https://console.tiyaro.ai/explore/trn:model:123456789012-venkat:1.0:alexnet_pytorch_6c50c5">
+<img src="https://tiyaro-public-docs.s3.us-west-2.amazonaws.com/assets/tiyaro_badge.svg"></a>
+
+
 ### Update (Feb 16, 2020)
 
 Now you can install this library directly using pip!

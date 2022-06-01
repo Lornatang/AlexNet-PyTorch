@@ -1,0 +1,6 @@
+{
+    "model_name": "alexnet_pytorch",
+    "model_framework": "pytorch",
+    "model_type": "image-classification",
+    "model_name_suffix": "6c50c5"
+}
