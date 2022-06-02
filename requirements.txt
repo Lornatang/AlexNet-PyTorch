@@ -1,0 +1,3 @@
+torch
+torchvision
+tiyaro==0.0.8
