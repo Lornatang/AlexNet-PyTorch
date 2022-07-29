@@ -20,6 +20,8 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -56,6 +58,7 @@ coverage.xml
 *.log
 local_settings.py
 db.sqlite3
+db.sqlite3-journal
 
 # Flask stuff:
 instance/
@@ -79,6 +82,13 @@ ipython_config.py
 
 # pyenv
 .python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
 
 # celery beat schedule file
 celerybeat-schedule
@@ -104,7 +114,6 @@ venv.bak/
 
 # mkdocs documentation
 /site
-
 # mypy
 .mypy_cache/
 .dmypy.json
@@ -113,19 +122,14 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# IDE file
+# custom
 .idea
 .vscode
 
-# Mac file
+# Mac configure file.
 .DS_Store
 
-# custom
-datasets
-examples/cifar/data
-examples/imagenet/data/train 
-examples/imagenet/data/test
-examples/imagenet/data/val
-examples/imagenet/data/labels_map.txt
-research/data
-framework/static/imagenet
+# Program run create directory.
+data
+results
+samples
