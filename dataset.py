@@ -22,6 +22,7 @@ from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from torchvision.datasets.folder import find_classes
+from torchvision.transforms import TrivialAugmentWide, RandomErasing
 
 import imgproc
 
@@ -61,14 +62,21 @@ class ImageDataset(Dataset):
 
         if self.mode == "Train":
             # Use PyTorch's own data enhancement to enlarge and enhance data
-            self.data_augmentation = transforms.Compose([
+            self.data_transform = transforms.Compose([
                 transforms.RandomResizedCrop([self.image_size, self.image_size]),
-                # TrivialAugmentWide(),
-                # RandomErasing(0.1),
+                TrivialAugmentWide(),
                 transforms.RandomRotation([0, 270]),
                 transforms.RandomHorizontalFlip(0.5),
                 transforms.RandomVerticalFlip(0.5),
             ])
+        elif self.mode == "Valid" or self.mode == "Test":
+            # Use PyTorch's own data enhancement to enlarge and enhance data
+            self.data_transform = transforms.Compose([
+                transforms.Resize([256, 256]),
+                transforms.CenterCrop([224, 224]),
+            ])
+        else:
+            raise "Unsupported data read type. Please use `Train` or `Valid` or `Test`"
 
     def __getitem__(self, batch_index: int) -> [torch.Tensor, int]:
         # Read a batch of image data
@@ -85,9 +93,8 @@ class ImageDataset(Dataset):
         # OpenCV convert PIL
         image = Image.fromarray(image)
 
-        if self.mode == "Train":
-            # Data augmentation
-            image = self.data_augmentation(image)
+        # Data process
+        image = self.data_transform(image)
 
         # Convert image data into Tensor stream format (PyTorch).
         # Note: The range of input and output is between [0, 1]
