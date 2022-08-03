@@ -36,8 +36,13 @@ exp_name = "AelexNet_200-TinyImageNet_200"
 
 if mode == "train":
     # Dataset address
+<<<<<<< Updated upstream
     train_image_dir = "./data/TinyImagenet_200/train"
     valid_image_dir = "./data/TinyImagenet_200/valid"
+=======
+    train_image_dir = f"/home/dl/Datasets/Classifier/TinyImagenet_200/train"
+    valid_image_dir = "/home/dl/Datasets/Classifier/TinyImagenet_200/valid"
+>>>>>>> Stashed changes
 
     image_size = 224
     batch_size = 128
@@ -56,7 +61,11 @@ if mode == "train":
     loss_label_smoothing = 0.1
 
     # Optimizer parameter
+<<<<<<< Updated upstream
     model_lr = 0.5
+=======
+    model_lr = 0.01
+>>>>>>> Stashed changes
     model_momentum = 0.9
     model_weight_decay = 0.0001
     model_ema_decay = 0.99998
