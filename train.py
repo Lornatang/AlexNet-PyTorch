@@ -152,8 +152,7 @@ def build_model() -> [nn.Module, nn.Module]:
     model = AlexNet(config.model_num_classes)
     model = model.to(device=config.device, memory_format=torch.channels_last)
 
-    ema_avg = lambda averaged_model_parameter, model_parameter, num_averaged: (
-                                                                                          1 - config.model_ema_decay) * averaged_model_parameter + config.model_ema_decay * model_parameter
+    ema_avg = lambda averaged_model_parameter, model_parameter, num_averaged: (1 - config.model_ema_decay) * averaged_model_parameter + config.model_ema_decay * model_parameter
     ema_model = AveragedModel(model, avg_fn=ema_avg)
 
     return model, ema_model
