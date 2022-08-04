@@ -32,7 +32,7 @@ class TiyaroHandler(TiyaroBase):
         self.model = model
 
         # Load class names
-        labels_map = json.load(open("examples/simple/MiniImageNet_1K_labels_map.txt"))
+        labels_map = json.load(open("examples/simple/ImageNet_1K_labels_map.txt"))
         labels_map = [labels_map[str(i)] for i in range(1000)]
         self.labels_map = labels_map
 
