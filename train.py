@@ -12,7 +12,6 @@
 # limitations under the License.
 # ==============================================================================
 import os
-import shutil
 import time
 
 import torch
@@ -27,14 +26,14 @@ from dataset import CUDAPrefetcher, ImageDataset
 from model import AlexNet
 from torch.optim.swa_utils import AveragedModel
 from torch.optim import lr_scheduler
-from utils import load_state_dict, accuracy, Summary, AverageMeter, ProgressMeter
+from utils import accuracy, load_state_dict, make_directory, save_checkpoint, Summary, AverageMeter, ProgressMeter
 
 
 def main():
     # Initialize the number of training epochs
     start_epoch = 0
 
-    # Initialize training to generate network evaluation indicators
+    # Initialize training network evaluation indicators
     best_acc1 = 0.0
 
     train_prefetcher, valid_prefetcher = load_dataset()
@@ -54,39 +53,36 @@ def main():
 
     print("Check whether to load pretrained model weights...")
     if config.pretrained_model_path:
-        model, start_epoch, best_acc1, optimizer, scheduler = load_state_dict(model,
-                                                                              ema_model,
-                                                                              config.pretrained_model_path,
-                                                                              "pretrained",
-                                                                              start_epoch,
-                                                                              best_acc1,
-                                                                              optimizer,
-                                                                              scheduler)
+        model, ema_model, start_epoch, best_acc1, optimizer, scheduler = load_state_dict(model,
+                                                                                         ema_model,
+                                                                                         config.pretrained_model_path,
+                                                                                         start_epoch,
+                                                                                         best_acc1,
+                                                                                         optimizer,
+                                                                                         scheduler)
         print(f"Loaded `{config.pretrained_model_path}` pretrained model weights successfully.")
     else:
         print("Pretrained model weights not found.")
 
     print("Check whether the pretrained model is restored...")
     if config.resume:
-        model, start_epoch, best_acc1, optimizer, scheduler = load_state_dict(model,
-                                                                              ema_model,
-                                                                              config.pretrained_model_path,
-                                                                              "resume",
-                                                                              start_epoch,
-                                                                              best_acc1,
-                                                                              optimizer,
-                                                                              scheduler)
+        model, ema_model, start_epoch, best_acc1, optimizer, scheduler = load_state_dict(model,
+                                                                                         ema_model,
+                                                                                         config.pretrained_model_path,
+                                                                                         start_epoch,
+                                                                                         best_acc1,
+                                                                                         optimizer,
+                                                                                         scheduler,
+                                                                                         "resume")
         print("Loaded pretrained generator model weights.")
     else:
         print("Resume training model not found. Start training from scratch.")
 
-    # Create a folder of super-resolution experiment results
+    # Create a experiment results
     samples_dir = os.path.join("samples", config.exp_name)
     results_dir = os.path.join("results", config.exp_name)
-    if not os.path.exists(samples_dir):
-        os.makedirs(samples_dir)
-    if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
+    make_directory(samples_dir)
+    make_directory(results_dir)
 
     # Create training process log file
     writer = SummaryWriter(os.path.join("samples", "logs", config.exp_name))
@@ -104,20 +100,19 @@ def main():
 
         # Automatically save the model with the highest index
         is_best = acc1 > best_acc1
+        is_last = (epoch + 1) == config.epochs
         best_acc1 = max(acc1, best_acc1)
-        torch.save({"epoch": epoch + 1,
-                    "best_acc1": best_acc1,
-                    "state_dict": model.state_dict(),
-                    "ema_state_dict": ema_model.state_dict(),
-                    "optimizer": optimizer.state_dict(),
-                    "scheduler": scheduler.state_dict()},
-                   os.path.join(samples_dir, f"epoch_{epoch + 1}.pth.tar"))
-        if is_best:
-            shutil.copyfile(os.path.join(samples_dir, f"epoch_{epoch + 1}.pth.tar"),
-                            os.path.join(results_dir, "best.pth.tar"))
-        if (epoch + 1) == config.epochs:
-            shutil.copyfile(os.path.join(samples_dir, f"epoch_{epoch + 1}.pth.tar"),
-                            os.path.join(results_dir, "last.pth.tar"))
+        save_checkpoint({"epoch": epoch + 1,
+                         "best_acc1": best_acc1,
+                         "state_dict": model.state_dict(),
+                         "ema_state_dict": ema_model.state_dict(),
+                         "optimizer": optimizer.state_dict(),
+                         "scheduler": scheduler.state_dict()},
+                        f"epoch_{epoch + 1}.pth.tar",
+                        samples_dir,
+                        results_dir,
+                        is_best,
+                        is_last)
 
 
 def load_dataset() -> [CUDAPrefetcher, CUDAPrefetcher]:
@@ -305,9 +300,8 @@ def validate(
             # Get batch size
             batch_size = images.size(0)
 
-            # Mixed precision training
-            with amp.autocast():
-                output = ema_model(images)
+            # Inference
+            output = ema_model(images)
 
             # measure accuracy and record loss
             top1, top5 = accuracy(output, target, topk=(1, 5))

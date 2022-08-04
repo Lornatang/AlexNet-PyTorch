@@ -58,7 +58,7 @@ if mode == "train":
     # Optimizer parameter
     model_lr = 0.01
     model_momentum = 0.9
-    model_weight_decay = 0.0001
+    model_weight_decay = 0.00005
     model_ema_decay = 0.99998
 
     # Learning rate scheduler parameter
@@ -68,3 +68,14 @@ if mode == "train":
 
     # How many iterations to print the training result
     print_frequency = 200
+
+if mode == "test":
+    # Test data address
+    test_image_dir = "./data/TinyImagenet_200/valid"
+
+    # Test dataloader parameters
+    image_size = 224
+    batch_size = 256
+    num_workers = 4
+
+    model_path = "./results/pretrained_models/AlexNet_200-TinyImageNet_200-da4a75be.pth.tar"

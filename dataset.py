@@ -22,7 +22,7 @@ from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from torchvision.datasets.folder import find_classes
-from torchvision.transforms import TrivialAugmentWide, RandomErasing
+from torchvision.transforms import TrivialAugmentWide
 
 import imgproc
 
@@ -73,7 +73,7 @@ class ImageDataset(Dataset):
             # Use PyTorch's own data enhancement to enlarge and enhance data
             self.data_transform = transforms.Compose([
                 transforms.Resize([256, 256]),
-                transforms.CenterCrop([224, 224]),
+                transforms.CenterCrop([self.image_size, self.image_size]),
             ])
         else:
             raise "Unsupported data read type. Please use `Train` or `Valid` or `Test`"

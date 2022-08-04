@@ -1,35 +1,59 @@
+# Copyright 2022 Dakewe Biotech Corporation. All Rights Reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
 from enum import Enum
 
 import torch
 from torch import nn
+import shutil
+import os
 
 __all__ = [
-    "load_state_dict", "accuracy", "Summary", "AverageMeter", "ProgressMeter"
+    "accuracy", "load_state_dict", "make_directory", "save_checkpoint", "Summary", "AverageMeter", "ProgressMeter"
 ]
+
+
+def accuracy(output, target, topk=(1,)):
+    """Computes the accuracy over the k top predictions for the specified values of k"""
+    with torch.no_grad():
+        maxk = max(topk)
+        batch_size = target.size(0)
+
+        _, pred = output.topk(maxk, 1, True, True)
+        pred = pred.t()
+        correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+        results = []
+        for k in topk:
+            correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
+            results.append(correct_k.mul_(100.0 / batch_size))
+        return results
 
 
 def load_state_dict(
         model: nn.Module,
         ema_model: nn.Module,
         model_weights_path: str,
-        load_mode: str,
         start_epoch: int = None,
         best_acc1: float = None,
         optimizer: torch.optim.Optimizer = None,
         scheduler: torch.optim.lr_scheduler = None,
-) -> [nn.Module, int, float, torch.optim.Optimizer, torch.optim.lr_scheduler]:
+        load_mode: str = None,
+) -> [nn.Module, nn.Module, str, int, float, torch.optim.Optimizer, torch.optim.lr_scheduler]:
     # Load model weights
     checkpoint = torch.load(model_weights_path, map_location=lambda storage, loc: storage)
 
-    if load_mode == "pretrained":
-        # Load model state dict. Extract the fitted model weights
-        model_state_dict = model.state_dict()
-        state_dict = {k: v for k, v in checkpoint["state_dict"].items() if
-                      k in model_state_dict.keys() and v.size() == model_state_dict[k].size()}
-        # Overwrite the model weights to the current model
-        model_state_dict.update(state_dict)
-        model.load_state_dict(model_state_dict)
-    elif load_mode == "resume":
+    if load_mode == "resume":
         # Restore the parameters in the training node to this point
         start_epoch = checkpoint["epoch"]
         best_acc1 = checkpoint["best_acc1"]
@@ -50,26 +74,37 @@ def load_state_dict(
         # Load the scheduler model
         scheduler.load_state_dict(checkpoint["scheduler"])
     else:
-        raise f"Unknown load_mode: `{load_mode}`. Please set load_mode to `pretrained` or `resume`."
+        # Load model state dict. Extract the fitted model weights
+        model_state_dict = model.state_dict()
+        state_dict = {k: v for k, v in checkpoint["state_dict"].items() if
+                      k in model_state_dict.keys() and v.size() == model_state_dict[k].size()}
+        # Overwrite the model weights to the current model
+        model_state_dict.update(state_dict)
+        model.load_state_dict(model_state_dict)
 
-    return model, start_epoch, best_acc1, optimizer, scheduler
+    return model, ema_model, start_epoch, best_acc1, optimizer, scheduler
 
 
-def accuracy(output, target, topk=(1,)):
-    """Computes the accuracy over the k top predictions for the specified values of k"""
-    with torch.no_grad():
-        maxk = max(topk)
-        batch_size = target.size(0)
+def make_directory(dir_path: str) -> None:
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
 
-        _, pred = output.topk(maxk, 1, True, True)
-        pred = pred.t()
-        correct = pred.eq(target.view(1, -1).expand_as(pred))
 
-        results = []
-        for k in topk:
-            correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
-            results.append(correct_k.mul_(100.0 / batch_size))
-        return results
+def save_checkpoint(
+        state_dict: dict,
+        file_name: str,
+        samples_dir: str,
+        results_dir: str,
+        is_best: bool = False,
+        is_last: bool = False,
+) -> None:
+    checkpoint_path = os.path.join(samples_dir, file_name)
+    torch.save(state_dict, checkpoint_path)
+
+    if is_best:
+        shutil.copyfile(checkpoint_path, os.path.join(results_dir, "best.pth.tar"))
+    if is_last:
+        shutil.copyfile(checkpoint_path, os.path.join(results_dir, "last.pth.tar"))
 
 
 class Summary(Enum):
