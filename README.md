@@ -4,221 +4,111 @@
 <img src="https://tiyaro-public-docs.s3.us-west-2.amazonaws.com/assets/tiyaro_badge.svg"></a>
 
 
-### Update (Feb 16, 2020)
+## Overview
 
-Now you can install this library directly using pip!
+This repository contains an op-for-op PyTorch reimplementation of [Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network](https://arxiv.org/abs/1609.04802v5).
+
+## Table of contents
+
+- [AlexNet-PyTorch](#alexnet-pytorch)
+    - [Overview](#overview)
+    - [Table of contents](#table-of-contents)
+    - [Download weights](#download-weights)
+    - [Download datasets](#download-datasets)
+    - [How Test and Train](#how-test-and-train)
+        - [Test](#test)
+        - [Train model](#train-model)
+        - [Resume train model](#resume-train-model)
+    - [Result](#result)
+    - [Contributing](#contributing)
+    - [Credit](#credit)
+        - [ImageNet Classification with Deep Convolutional Neural Networks](#imagenet-classification-with-deep-convolutional-neural-networks)
+
+## Download weights
+
+- [Google Driver](https://drive.google.com/drive/folders/17ju2HN7Y6pyPK2CC_AqnAfTOe9_3hCQ8?usp=sharing)
+- [Baidu Driver](https://pan.baidu.com/s/1yNs4rqIb004-NKEdKBJtYg?pwd=llot)
+
+## Download datasets
+
+Contains MNIST, CIFAR10&CIFAR100, ImageNet_200, ImageNet_1K, Caltech101&Caltech256 and more etc.
+
+- [Google Driver]()
+- [Baidu Driver](https://pan.baidu.com/s/1arNM38vhDT7p4jKeD4sqwA?pwd=llot)
+
+Please refer to `README.md` in the `data` directory for the method of making a dataset.
+
+## How Test and Train
+
+Both training and testing only need to modify the `config.py` file. 
+
+### Test
+
+- line 31: `model_num_classes` change to `200`.
+- line 33: `mode` change to `test`.
+- line 81: `model_path` change to `./results/pretrained_models/AlexNet_200-TinyImageNet_200-da4a75be.pth.tar`.
+
+```bash
+python3 test.py
+```
+
+### Train model
+
+- line 31: `model_num_classes` change to `200`.
+- line 33: `mode` change to `train`.
+- line 35: `exp_name` change to `AlexNet_200-TinyImageNet_200`.
+- line 47: `pretrained_model_path` change to `./results/pretrained_models/AlexNet_200-TinyImageNet_200-da4a75be.pth.tar`.
+
+```bash
+python3 train.py
+```
+
+### Resume train model
+
+- line 31: `model_num_classes` change to `200`.
+- line 33: `mode` change to `train`.
+- line 35: `exp_name` change to `AlexNet_200-TinyImageNet_200`.
+- line 50: `resume` change to `./samples/AlexNet_200-TinyImageNet_200/epoch_xxx.pth.tar`.
+
+```bash
+python3 train.py
+```
+
+## Result
+
+Source of original paper results: [https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf](https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf)
+
+In the following table, the psnr value in `()` indicates the result of the project, and `-` indicates no test.
+
+|  Model  |     Dataset      |      Top-1       |      Top-5       |
+|:-------:|:----------------:|:----------------:|:----------------:|
+| AlexNet | TinyImageNet_200 | 32.05(**32.16**) | 29.40(**29.08**) |
+
+```bash
+# Download `AlexNet_200-TinyImageNet_200-da4a75be.pth.tar` weights to `./results/pretrained_models`
+# More detail see `README.md<Download weights>`
+python3 ./inference.py --inputs_path ./figure/comic_lr.png --output_path ./figure/comic_sr.png --weights_path ./results/pretrained_models/SRGAN_x4-ImageNet-c71a4860.pth.tar
+```
+
+Input: 
+
+<span align="center"><img width="224" height="224" src="figure/comic_lr.png"/></span>
+
+Output: 
+
+<span align="center"><img width="240" height="360" src="figure/comic_sr.png"/></span>
 
 ```text
-pip3 install --upgrade alexnet_pytorch
+Build SRGAN model successfully.
+Load SRGAN model weights `./results/pretrained_models/SRGAN_x4-ImageNet-c71a4860.pth.tar` successfully.
+SR image save to `./figure/comic_sr.png`
 ```
 
-### Update (Feb 13, 2020)
+## Contributing
 
-The update is for ease of use and deployment.
+If you find a bug, create a GitHub issue, or even better, submit a pull request. Similarly, if you have questions, simply post them as GitHub issues.
 
- * [Example: Export to ONNX](#example-export-to-onnx)
- * [Example: Extract features](#example-feature-extraction)
- * [Example: Visual](#example-visual)
-
-It is also now incredibly simple to load a pretrained model with a new number of classes for transfer learning:
-
-```python
-from alexnet_pytorch import AlexNet
-model = AlexNet.from_pretrained('alexnet', num_classes=10)
-```
-
-### Update (January 15, 2020)
-
-This update allows you to use NVIDIA's Apex tool for accelerated training. By default choice `hybrid training precision` + `dynamic loss amplified` version, if you need to learn more and details about `apex` tools, please visit https://github.com/NVIDIA/apex.
-
-### Overview
-This repository contains an op-for-op PyTorch reimplementation of [AlexNet](http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf).
-
-The goal of this implementation is to be simple, highly extensible, and easy to integrate into your own projects. This implementation is a work in progress -- new features are currently being implemented.  
-
-At the moment, you can easily:  
- * Load pretrained AlexNet models 
- * Use AlexNet models for classification or feature extraction 
-
-_Upcoming features_: In the next few days, you will be able to:
- * Quickly finetune an AlexNet on your own dataset
- * Export AlexNet models for production
-
-### Table of contents
-1. [About AlexNet](#about-alexnet)
-2. [Model Description](#model-description)
-3. [Installation](#installation)
-4. [Usage](#usage)
-    * [Load pretrained models](#loading-pretrained-models)
-    * [Example: Classify](#example-classification)
-    * [Example: Extract features](#example-feature-extraction)
-    * [Example: Export to ONNX](#example-export-to-onnx)
-    * [Example: Visual](#example-visual)
-5. [Contributing](#contributing) 
-
-### About AlexNet
-
-If you're new to AlexNets, here is an explanation straight from the official PyTorch implementation: 
-
-Current approaches to object recognition make essential use of machine learning methods. To improve their performance, we can collect larger datasets, learn more powerful models, and use better techniques for preventing overfitting. Until recently, datasets of labeled images were relatively
-small — on the order of tens of thousands of images (e.g., NORB [16], Caltech-101/256 [8, 9], and
-CIFAR-10/100 [12]). Simple recognition tasks can be solved quite well with datasets of this size,
-especially if they are augmented with label-preserving transformations. For example, the currentbest error rate on the MNIST digit-recognition task (<0.3%) approaches human performance [4].
-But objects in realistic settings exhibit considerable variability, so to learn to recognize them it is
-necessary to use much larger training sets. And indeed, the shortcomings of small image datasets
-have been widely recognized (e.g., Pinto et al. [21]), but it has only recently become possible to collect labeled datasets with millions of images. The new larger datasets include LabelMe [23], which
-consists of hundreds of thousands of fully-segmented images, and ImageNet [6], which consists of
-over 15 million labeled high-resolution images in over 22,000 categories. 
-
-### Model Description
-
-AlexNet competed in the ImageNet Large Scale Visual Recognition Challenge on September 30, 2012. The network achieved a top-5 error of 15.3%, more than 10.8 percentage points lower than that of the runner up. The original paper's primary result was that the depth of the model was essential for its high performance, which was computationally expensive, but made feasible due to the utilization of graphics processing units (GPUs) during training.
-
-The 1-crop error rates on the imagenet dataset with the pretrained model are listed below.
-
-|Model structure|*Top-1 error*|*Top-5 error*|
-|:-------------:|:-----------:|:-----------:|
-|    alexnet    |    43.48    |    20.93    |
-
-### Installation
-
-Install from pypi:
-```bash
-pip install alexnet_pytorch
-```
-
-Install from source:
-```bash
-git clone https://github.com/lornatang/AlexNet-PyTorch.git
-cd AlexNet-PyTorch
-pip install -e .
-```
-
-### Usage
-
-#### Loading pretrained models
-
-Load an AlexNet:  
-```python
-from alexnet_pytorch import AlexNet
-model = AlexNet.from_name('alexnet')
-```
-
-Load a pretrained AlexNet: 
-```python
-from alexnet_pytorch import AlexNet
-model = AlexNet.from_pretrained('alexnet')
-```
-
-#### Example: Classification
-
-We assume that in your current directory, there is a `img.jpg` file and a `labels_map.txt` file (ImageNet class names). These are both included in `examples/simple`. 
-
-All pre-trained models expect input images normalized in the same way,
-i.e. mini-batches of 3-channel RGB images of shape `(3 x H x W)`, where `H` and `W` are expected to be at least `224`.
-The images have to be loaded in to a range of `[0, 1]` and then normalized using `mean = [0.485, 0.456, 0.406]`
-and `std = [0.229, 0.224, 0.225]`.
-
-Here's a sample execution.
-
-```python
-import json
-
-import torch
-import torchvision.transforms as transforms
-from PIL import Image
-
-from alexnet_pytorch import AlexNet
-
-# Open image
-input_image = Image.open("img.jpg")
-
-# Preprocess image
-preprocess = transforms.Compose([
-  transforms.Resize(256),
-  transforms.CenterCrop(224),
-  transforms.ToTensor(),
-  transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-])
-input_tensor = preprocess(input_image)
-input_batch = input_tensor.unsqueeze(0)  # create a mini-batch as expected by the model
-
-# Load class names
-labels_map = json.load(open("labels_map.txt"))
-labels_map = [labels_map[str(i)] for i in range(1000)]
-
-# Classify with AlexNet
-model = AlexNet.from_pretrained("alexnet")
-model.eval()
-
-# move the input and model to GPU for speed if available
-if torch.cuda.is_available():
-  input_batch = input_batch.to("cuda")
-  model.to("cuda")
-
-with torch.no_grad():
-  logits = model(input_batch)
-preds = torch.topk(logits, k=5).indices.squeeze(0).tolist()
-
-print("-----")
-for idx in preds:
-  label = labels_map[idx]
-  prob = torch.softmax(logits, dim=1)[0, idx].item()
-  print(f"{label:<75} ({prob * 100:.2f}%)")
-```
-
-#### Example: Feature Extraction 
-
-You can easily extract features with `model.extract_features`:
-```python
-import torch
-from alexnet_pytorch import AlexNet
-model = AlexNet.from_pretrained('alexnet')
-
-# ... image preprocessing as in the classification example ...
-inputs = torch.randn(1, 3, 224, 224)
-print(inputs.shape) # torch.Size([1, 3, 224, 224])
-
-features = model.extract_features(inputs)
-print(features.shape) # torch.Size([1, 256, 6, 6])
-```
-
-#### Example: Export to ONNX  
-
-Exporting to ONNX for deploying to production is now simple: 
-```python
-import torch 
-from alexnet_pytorch import AlexNet
-
-model = AlexNet.from_pretrained('alexnet')
-dummy_input = torch.randn(16, 3, 224, 224)
-
-torch.onnx.export(model, dummy_input, "demo.onnx", verbose=True)
-```
-
-#### Example: Visual
-
-```text
-cd $REPO$/framework
-sh start.sh
-```
-
-Then open the browser and type in the browser address [http://127.0.0.1:20000/](http://127.0.0.1:20000/).
-
-Enjoy it.
-
-#### ImageNet
-
-See `examples/imagenet` for details about evaluating on ImageNet.
-
-For more datasets result. Please see `research/README.md`.
-
-### Contributing
-
-If you find a bug, create a GitHub issue, or even better, submit a pull request. Similarly, if you have questions, simply post them as GitHub issues.   
-
-I look forward to seeing what the community does with these models! 
-
+I look forward to seeing what the community does with these models!
 
 ### Credit
 
@@ -239,13 +129,13 @@ that proved to be very effective. We also entered a variant of this model in the
 ILSVRC-2012 competition and achieved a winning top-5 test error rate of 15.3%,
 compared to 26.2% achieved by the second-best entry.
 
-[paper](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)
+[[Paper]](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)
 
-```text
+```bibtex
 @article{AlexNet,
-title:{ImageNet Classification with Deep Convolutional Neural Networks},
-author:{Alex Krizhevsky,Ilya Sutskever,Geoffrey E. Hinton},
-journal={nips},
-year={2012}
+    title = {ImageNet Classification with Deep Convolutional Neural Networks},
+    author = {Alex Krizhevsky,Ilya Sutskever,Geoffrey E. Hinton},
+    journal = {nips},
+    year = {2012}
 }
 ```
