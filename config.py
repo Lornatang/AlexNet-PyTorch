@@ -32,7 +32,7 @@ model_num_classes = 200
 # Current configuration parameter method
 mode = "train"
 # Experiment name, easy to save weights and log files
-exp_name = "AelexNet_200-TinyImageNet_200"
+exp_name = "AlexNet_200-TinyImageNet_200"
 
 if mode == "train":
     # Dataset address
@@ -44,7 +44,7 @@ if mode == "train":
     num_workers = 4
 
     # The address to load the pretrained model
-    pretrained_model_path = ""
+    pretrained_model_path = "./results/pretrained_models/AlexNet_200-TinyImageNet_200-da4a75be.pth.tar"
 
     # Incremental training and migration training
     resume = ""
