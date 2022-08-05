@@ -11,43 +11,33 @@ Contains MNIST, CIFAR10&CIFAR100, TinyImageNet_200, MiniImageNet_1K, ImageNet_1K
 
 ```text
 # Dataset struct
-- MiniImageNet_1K
-    - original
-        - mini_imagenet
-            - images
-                - n0153282900000005.jpg
-                - n0153282900000006.jpg
-                - ...
-        - train.csv
-        - valid.csv
-        - test.csv
+- ImageNet_1K
+    - ILSVRC2012_img_train
+        - ILSVRC2012_img_train.tar
+    - ILSVRC2012_img_val
+        - ILSVRC2012_img_val.tar
+        - valprep.sh
 ```
 
 ## Step3: Preprocess the dataset
 
 ```bash
 cd <AlexNet-PyTorch-main>/scripts
-python3 preprocess_mini_imagenet.py
+bash preprocess_imagenet.sh
 ```
 
 ## Step4: Check that the final dataset directory schema is completely correct
 
 ```text
 # Train dataset
-- MiniImageNet_1K
-    - train
-       - n0153282900000005.jpg
-       ...
-    - valid
-    - test
-    - original
-        - mini_imagenet
-            - images
-                - n0153282900000005.jpg
-                - n0153282900000006.jpg
-                - ...
-        - train.csv
-        - valid.csv
-        - test.csv
+- ImageNet_1K
+    - ILSVRC2012_img_train
+        - n01440764
+            - n01440764_18.JPEG
+        - ...
+    - ILSVRC2012_img_val
+        - n01440764
+            - ILSVRC2012_val_00000293.JPEG
+        - ...
 ```
 
