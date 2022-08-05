@@ -30,14 +30,14 @@ only_test_y_channel = True
 # Model number class
 model_num_classes = 1000
 # Current configuration parameter method
-mode = "test"
+mode = "train"
 # Experiment name, easy to save weights and log files
 exp_name = "AlexNet-ImageNet_1K"
 
 if mode == "train":
     # Dataset address
-    train_image_dir = "./data/ImageNet_1K/train"
-    valid_image_dir = "./data/ImageNet_1K/valid"
+    train_image_dir = "./data/ImageNet_1K/ILSVRC2012_img_train"
+    valid_image_dir = "./data/ImageNet_1K/ILSVRC2012_img_val"
 
     image_size = 224
     batch_size = 128
@@ -71,7 +71,7 @@ if mode == "train":
 
 if mode == "test":
     # Test data address
-    test_image_dir = "./data/ImageNet_1K/valid"
+    test_image_dir = "./data/ImageNet_1K/ILSVRC2012_img_val"
 
     # Test dataloader parameters
     image_size = 224
