@@ -62,7 +62,7 @@ class ImageDataset(Dataset):
 
         if self.mode == "Train":
             # Use PyTorch's own data enhancement to enlarge and enhance data
-            self.data_transform = transforms.Compose([
+            self.pre_transform = transforms.Compose([
                 transforms.RandomResizedCrop([self.image_size, self.image_size]),
                 TrivialAugmentWide(),
                 transforms.RandomRotation([0, 270]),
@@ -71,12 +71,17 @@ class ImageDataset(Dataset):
             ])
         elif self.mode == "Valid" or self.mode == "Test":
             # Use PyTorch's own data enhancement to enlarge and enhance data
-            self.data_transform = transforms.Compose([
+            self.pre_transform = transforms.Compose([
                 transforms.Resize([256, 256]),
                 transforms.CenterCrop([self.image_size, self.image_size]),
             ])
         else:
             raise "Unsupported data read type. Please use `Train` or `Valid` or `Test`"
+
+        self.post_transform = transforms.Compose([
+            transforms.ConvertImageDtype(torch.float),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
 
     def __getitem__(self, batch_index: int) -> [torch.Tensor, int]:
         # Read a batch of image data
@@ -93,12 +98,15 @@ class ImageDataset(Dataset):
         # OpenCV convert PIL
         image = Image.fromarray(image)
 
-        # Data process
-        image = self.data_transform(image)
+        # Data preprocess
+        image = self.pre_transform(image)
 
         # Convert image data into Tensor stream format (PyTorch).
         # Note: The range of input and output is between [0, 1]
         tensor = imgproc.image_to_tensor(image, False, False)
+
+        # Data postprocess
+        tensor = self.post_transform(tensor)
 
         return {"image": tensor, "target": target}
 

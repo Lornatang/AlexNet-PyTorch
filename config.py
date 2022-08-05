@@ -56,15 +56,15 @@ if mode == "train":
     loss_label_smoothing = 0.1
 
     # Optimizer parameter
-    model_lr = 0.01
+    model_lr = 0.5
     model_momentum = 0.9
-    model_weight_decay = 0.00005
+    model_weight_decay = 2e-05
     model_ema_decay = 0.99998
 
     # Learning rate scheduler parameter
     lr_scheduler_T_0 = epochs // 4
     lr_scheduler_T_mult = 1
-    lr_scheduler_eta_min = 1e-4
+    lr_scheduler_eta_min = 5e-5
 
     # How many iterations to print the training result
     print_frequency = 200

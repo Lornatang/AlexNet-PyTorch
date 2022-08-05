@@ -20,7 +20,7 @@ import torch
 from PIL import Image
 from torch import nn
 from torch.optim.swa_utils import AveragedModel
-from torchvision.transforms import Resize
+from torchvision.transforms import Resize, ConvertImageDtype, Normalize
 
 import imgproc
 from model import AlexNet
@@ -63,9 +63,13 @@ def preprocess_image(image_path: str, image_size: int, device: torch.device) -> 
 
     # Resize to 224
     image = Resize([image_size, image_size])(image)
-
     # Convert image data to pytorch format data
     tensor = imgproc.image_to_tensor(image, False, False).unsqueeze_(0)
+    # Convert a tensor image to the given ``dtype`` and scale the values accordingly
+    tensor = ConvertImageDtype(torch.float)(tensor)
+    # Normalize a tensor image with mean and standard deviation.
+    tensor = Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])(tensor)
+
     # Transfer tensor channel image format data to CUDA device
     tensor = tensor.to(device=device, memory_format=torch.channels_last, non_blocking=True)
 
@@ -109,7 +113,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--class_label_file", type=str, default="./data/ImageNet_1K_labels_map.txt")
     parser.add_argument("--model_num_classes", type=int, default=1000)
-    parser.add_argument("--model_weights_path", type=str, default="./results/pretrained_models/AlexNet-TinyImageNet_1K-da4a75be.pth.tar")
+    parser.add_argument("--model_weights_path", type=str, default="./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar")
     parser.add_argument("--image_path", type=str, default="./figure/n01440764_36.JPEG")
     parser.add_argument("--image_size", type=int, default=224)
     parser.add_argument("--device_type", type=str, default="cpu", choices=["cpu", "cuda"])

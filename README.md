@@ -82,7 +82,7 @@ In the following table, the top-x error value in `()` indicates the result of th
 
 |  Model  |   Dataset   | Top-1 Error (%) | Top-5 Error (%) |
 |:-------:|:-----------:|:---------------:|:---------------:|
-| AlexNet | ImageNet_1K |   37.5(**-**)   |   17.0(**-**)   |
+| AlexNet | ImageNet_1K | 37.5(**45.47**) | 17.0(**22.43**) |
 
 ```bash
 # Download `AlexNet-ImageNet_1K-9df8cd0f.pth.tar` weights to `./results/pretrained_models`
@@ -98,12 +98,12 @@ Output:
 
 ```text
 Build AlexNet model successfully.
-Load AlexNet model weights `/home/dl/Code/AlexNet-PyTorch/results/pretrained_models/AlexNet-ImageNet_1K-da4a75be.pth.tar` successfully.
-hammerhead, hammerhead shark                                                (22.57%)
-axolotl, mud puppy, Ambystoma mexicanum                                     (16.57%)
-stingray                                                                    (16.50%)
-dugong, Dugong dugon                                                        (9.07%)
-electric ray, crampfish, numbfish, torpedo                                  (7.07%)
+Load AlexNet model weights `/home/dl/Code/AlexNet-PyTorch/results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar` successfully.
+tench, Tinca tinca                                                          (95.73%)
+bolete                                                                      (1.20%)
+triceratops                                                                 (0.43%)
+platypus, duckbill, duckbilled platypus, duck-billed platypus, Ornithorhynchus anatinus (0.36%)
+croquet ball                                                                (0.28%)
 ```
 
 ## Contributing
