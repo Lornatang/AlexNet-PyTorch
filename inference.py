@@ -74,7 +74,7 @@ def preprocess_image(image_path: str, image_size: int, device: torch.device) -> 
 
 def main():
     # Get the label name corresponding to the drawing
-    class_label_map = load_class_label(args.class_label_file, args.num_classes)
+    class_label_map = load_class_label(args.class_label_file, args.model_num_classes)
 
     device = choice_device(args.device_type)
 
@@ -107,10 +107,10 @@ def main():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--class_label_file", type=str, default="")
-    parser.add_argument("--model_num_classes", type=int, default=200)
-    parser.add_argument("--model_weights_path", type=str, default="./results/pretrained_models/AlexNet_200-TinyImageNet_200-da4a75be.pth.tar")
-    parser.add_argument("--image_path", type=str, default="")
+    parser.add_argument("--class_label_file", type=str, default="./data/ImageNet_1K_labels_map.txt")
+    parser.add_argument("--model_num_classes", type=int, default=1000)
+    parser.add_argument("--model_weights_path", type=str, default="./results/pretrained_models/AlexNet-TinyImageNet_1K-da4a75be.pth.tar")
+    parser.add_argument("--image_path", type=str, default="./figure/n01440764_36.JPEG")
     parser.add_argument("--image_size", type=int, default=224)
     parser.add_argument("--device_type", type=str, default="cpu", choices=["cpu", "cuda"])
     args = parser.parse_args()

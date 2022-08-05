@@ -44,9 +44,9 @@ Both training and testing only need to modify the `config.py` file.
 
 ### Test
 
-- line 31: `model_num_classes` change to `200`.
+- line 31: `model_num_classes` change to `1000`.
 - line 33: `mode` change to `test`.
-- line 81: `model_path` change to `./results/pretrained_models/AlexNet_200-TinyImageNet_200-da4a75be.pth.tar`.
+- line 81: `model_path` change to `./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar`.
 
 ```bash
 python3 test.py
@@ -54,10 +54,10 @@ python3 test.py
 
 ### Train model
 
-- line 31: `model_num_classes` change to `200`.
+- line 31: `model_num_classes` change to `1000`.
 - line 33: `mode` change to `train`.
-- line 35: `exp_name` change to `AlexNet_200-TinyImageNet_200`.
-- line 47: `pretrained_model_path` change to `./results/pretrained_models/AlexNet_200-TinyImageNet_200-da4a75be.pth.tar`.
+- line 35: `exp_name` change to `AlexNet-ImageNet`.
+- line 47: `pretrained_model_path` change to `./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar`.
 
 ```bash
 python3 train.py
@@ -67,8 +67,8 @@ python3 train.py
 
 - line 31: `model_num_classes` change to `200`.
 - line 33: `mode` change to `train`.
-- line 35: `exp_name` change to `AlexNet_200-TinyImageNet_200`.
-- line 50: `resume` change to `./samples/AlexNet_200-TinyImageNet_200/epoch_xxx.pth.tar`.
+- line 35: `exp_name` change to `AlexNet-ImageNet`.
+- line 50: `resume` change to `./samples/AlexNet-ImageNet/epoch_xxx.pth.tar`.
 
 ```bash
 python3 train.py
@@ -85,23 +85,25 @@ In the following table, the psnr value in `()` indicates the result of the proje
 | AlexNet | TinyImageNet_200 | 32.05(**32.16**) | 29.40(**29.08**) |
 
 ```bash
-# Download `AlexNet_200-TinyImageNet_200-da4a75be.pth.tar` weights to `./results/pretrained_models`
+# Download `AlexNet-ImageNet_1K-9df8cd0f.pth.tar` weights to `./results/pretrained_models`
 # More detail see `README.md<Download weights>`
-python3 ./inference.py --inputs_path ./figure/comic_lr.png --output_path ./figure/comic_sr.png --weights_path ./results/pretrained_models/SRGAN_x4-ImageNet-c71a4860.pth.tar
+python3 ./inference.py 
 ```
 
 Input: 
 
-<span align="center"><img width="224" height="224" src="figure/comic_lr.png"/></span>
+<span align="center"><img width="224" height="224" src="figure/n01440764_36.JPEG"/></span>
 
 Output: 
 
-<span align="center"><img width="240" height="360" src="figure/comic_sr.png"/></span>
-
 ```text
-Build SRGAN model successfully.
-Load SRGAN model weights `./results/pretrained_models/SRGAN_x4-ImageNet-c71a4860.pth.tar` successfully.
-SR image save to `./figure/comic_sr.png`
+Build AlexNet model successfully.
+Load AlexNet model weights `/home/dl/Code/AlexNet-PyTorch/results/pretrained_models/AlexNet-TinyImageNet_1K-da4a75be.pth.tar` successfully.
+hammerhead, hammerhead shark                                                (22.57%)
+axolotl, mud puppy, Ambystoma mexicanum                                     (16.57%)
+stingray                                                                    (16.50%)
+dugong, Dugong dugon                                                        (9.07%)
+electric ray, crampfish, numbfish, torpedo                                  (7.07%)
 ```
 
 ## Contributing
