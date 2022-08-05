@@ -44,9 +44,9 @@ Both training and testing only need to modify the `config.py` file.
 
 ### Test
 
-- line 31: `model_num_classes` change to `1000`.
-- line 33: `mode` change to `test`.
-- line 81: `model_path` change to `./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar`.
+- line 29: `model_num_classes` change to `1000`.
+- line 31: `mode` change to `test`.
+- line 79: `model_path` change to `./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar`.
 
 ```bash
 python3 test.py
@@ -54,10 +54,10 @@ python3 test.py
 
 ### Train model
 
-- line 31: `model_num_classes` change to `1000`.
-- line 33: `mode` change to `train`.
-- line 35: `exp_name` change to `AlexNet-ImageNet_1K`.
-- line 47: `pretrained_model_path` change to `./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar`.
+- line 29: `model_num_classes` change to `1000`.
+- line 31: `mode` change to `train`.
+- line 33: `exp_name` change to `AlexNet-ImageNet_1K`.
+- line 45: `pretrained_model_path` change to `./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar`.
 
 ```bash
 python3 train.py
@@ -65,10 +65,10 @@ python3 train.py
 
 ### Resume train model
 
-- line 31: `model_num_classes` change to `1000`.
-- line 33: `mode` change to `train`.
-- line 35: `exp_name` change to `AlexNet-ImageNet_1K`.
-- line 50: `resume` change to `./samples/AlexNet-ImageNet_1K/epoch_xxx.pth.tar`.
+- line 29: `model_num_classes` change to `1000`.
+- line 31: `mode` change to `train`.
+- line 33: `exp_name` change to `AlexNet-ImageNet_1K`.
+- line 48: `resume` change to `./samples/AlexNet-ImageNet_1K/epoch_xxx.pth.tar`.
 
 ```bash
 python3 train.py
@@ -80,9 +80,9 @@ Source of original paper results: [https://proceedings.neurips.cc/paper/2012/fil
 
 In the following table, the top-x error value in `()` indicates the result of the project, and `-` indicates no test.
 
-|  Model  |   Dataset   | Top-1 Error (%) | Top-5 Error (%) |
-|:-------:|:-----------:|:---------------:|:---------------:|
-| AlexNet | ImageNet_1K | 37.5(**45.47**) | 17.0(**22.43**) |
+|  Model  |   Dataset   | Top-1 error (val) | Top-5 error (val) |
+|:-------:|:-----------:|:-----------------:|:-----------------:|
+| AlexNet | ImageNet_1K | 36.7%(**43.8%**)  | 15.4%(**21.3%**)  |
 
 ```bash
 # Download `AlexNet-ImageNet_1K-9df8cd0f.pth.tar` weights to `./results/pretrained_models`

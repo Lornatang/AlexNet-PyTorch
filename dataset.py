@@ -64,7 +64,7 @@ class ImageDataset(Dataset):
         if self.mode == "Train":
             # Use PyTorch's own data enhancement to enlarge and enhance data
             self.pre_transform = transforms.Compose([
-                transforms.RandomResizedCrop([self.image_size, self.image_size]),
+                transforms.RandomResizedCrop(self.image_size),
                 TrivialAugmentWide(),
                 transforms.RandomRotation([0, 270]),
                 transforms.RandomHorizontalFlip(0.5),
@@ -73,7 +73,7 @@ class ImageDataset(Dataset):
         elif self.mode == "Valid" or self.mode == "Test":
             # Use PyTorch's own data enhancement to enlarge and enhance data
             self.pre_transform = transforms.Compose([
-                transforms.Resize([256, 256]),
+                transforms.Resize(256),
                 transforms.CenterCrop([self.image_size, self.image_size]),
             ])
         else:
