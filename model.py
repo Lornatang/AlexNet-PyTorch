@@ -24,7 +24,7 @@ __all__ = [
 ]
 
 class AlexNet(nn.Module):
-    def __init__(self, num_classes: int = 1000, dropout: float = 0.5) -> None:
+    def __init__(self, num_classes: int = 1000) -> None:
         super(AlexNet, self).__init__()
 
         self.features = nn.Sequential(
@@ -48,10 +48,10 @@ class AlexNet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
 
         self.classifier = nn.Sequential(
-            nn.Dropout(dropout),
+            nn.Dropout(0.5),
             nn.Linear(256 * 6 * 6, 4096),
             nn.ReLU(True),
-            nn.Dropout(dropout),
+            nn.Dropout(0.5),
             nn.Linear(4096, 4096),
             nn.ReLU(True),
             nn.Linear(4096, num_classes),

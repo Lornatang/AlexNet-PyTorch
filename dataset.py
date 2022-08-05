@@ -47,7 +47,8 @@ class ImageDataset(Dataset):
     Args:
         image_dir (str): Train/Valid dataset address.
         image_size (int): Image size.
-        mode (str): Data set loading method, the training data set is for data enhancement, and the verification data set is not for data enhancement.
+        mode (str): Data set loading method, the training data set is for data enhancement,
+            and the verification data set is not for data enhancement.
     """
 
     def __init__(self, image_dir: str, image_size: int, mode: str) -> None:
@@ -84,10 +85,11 @@ class ImageDataset(Dataset):
         ])
 
     def __getitem__(self, batch_index: int) -> [torch.Tensor, int]:
+        image_dir, image_name = self.image_file_paths[batch_index].split(self.delimiter)[-2:]
         # Read a batch of image data
-        if self.image_file_paths[batch_index].split(self.delimiter)[-1].split(".")[-1].lower() in IMG_EXTENSIONS:
+        if image_name.split(".")[-1].lower() in IMG_EXTENSIONS:
             image = cv2.imread(self.image_file_paths[batch_index])
-            target = self.class_to_idx[self.image_file_paths[batch_index].split(self.delimiter)[-2]]
+            target = self.class_to_idx[image_dir]
         else:
             raise ValueError(f"Unsupported image extensions, Only support `{IMG_EXTENSIONS}`, "
                              "please check the image file extensions.")

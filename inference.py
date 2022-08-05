@@ -44,7 +44,7 @@ def choice_device(device_type: str) -> torch.device:
 
 
 def build_model(model_num_classes: int, device: torch.device) -> [nn.Module, nn.Module]:
-    model = alexnet(model_num_classes)
+    model = alexnet(num_classes=args.model_num_classes)
     model = model.to(device=device, memory_format=torch.channels_last)
 
     ema_model = AveragedModel(model)
