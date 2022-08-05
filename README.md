@@ -6,7 +6,7 @@
 
 ## Overview
 
-This repository contains an op-for-op PyTorch reimplementation of [Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network](https://arxiv.org/abs/1609.04802v5).
+This repository contains an op-for-op PyTorch reimplementation of [ImageNet Classification with Deep Convolutional Neural Networks](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf).
 
 ## Table of contents
 
@@ -65,10 +65,10 @@ python3 train.py
 
 ### Resume train model
 
-- line 31: `model_num_classes` change to `200`.
+- line 31: `model_num_classes` change to `1000`.
 - line 33: `mode` change to `train`.
 - line 35: `exp_name` change to `AlexNet-ImageNet_1K`.
-- line 50: `resume` change to `./samples/AlexNet-ImageNet/epoch_xxx.pth.tar`.
+- line 50: `resume` change to `./samples/AlexNet-ImageNet_1K/epoch_xxx.pth.tar`.
 
 ```bash
 python3 train.py
@@ -78,11 +78,11 @@ python3 train.py
 
 Source of original paper results: [https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf](https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf)
 
-In the following table, the psnr value in `()` indicates the result of the project, and `-` indicates no test.
+In the following table, the top-x error value in `()` indicates the result of the project, and `-` indicates no test.
 
-|  Model  |     Dataset      |      Top-1       |      Top-5       |
-|:-------:|:----------------:|:----------------:|:----------------:|
-| AlexNet | TinyImageNet_200 | 32.05(**32.16**) | 29.40(**29.08**) |
+|  Model  |   Dataset   | Top-1 Error (%) | Top-5 Error (%) |
+|:-------:|:-----------:|:---------------:|:---------------:|
+| AlexNet | ImageNet_1K |   37.5(**-**)   |   17.0(**-**)   |
 
 ```bash
 # Download `AlexNet-ImageNet_1K-9df8cd0f.pth.tar` weights to `./results/pretrained_models`
