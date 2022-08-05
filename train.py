@@ -23,7 +23,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import config
 from dataset import CUDAPrefetcher, ImageDataset
-from model import AlexNet
+from model import alexnet
 from torch.optim.swa_utils import AveragedModel
 from torch.optim import lr_scheduler
 from utils import accuracy, load_state_dict, make_directory, save_checkpoint, Summary, AverageMeter, ProgressMeter
@@ -144,7 +144,7 @@ def load_dataset() -> [CUDAPrefetcher, CUDAPrefetcher]:
 
 
 def build_model() -> [nn.Module, nn.Module]:
-    model = AlexNet(config.model_num_classes)
+    model = alexnet(config.model_num_classes)
     model = model.to(device=config.device, memory_format=torch.channels_last)
 
     ema_avg = lambda averaged_model_parameter, model_parameter, num_averaged: (1 - config.model_ema_decay) * averaged_model_parameter + config.model_ema_decay * model_parameter

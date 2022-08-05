@@ -23,7 +23,7 @@ from torch.optim.swa_utils import AveragedModel
 from torchvision.transforms import Resize, ConvertImageDtype, Normalize
 
 import imgproc
-from model import AlexNet
+from model import alexnet
 from utils import load_state_dict
 
 
@@ -44,7 +44,7 @@ def choice_device(device_type: str) -> torch.device:
 
 
 def build_model(model_num_classes: int, device: torch.device) -> [nn.Module, nn.Module]:
-    model = AlexNet(model_num_classes)
+    model = alexnet(model_num_classes)
     model = model.to(device=device, memory_format=torch.channels_last)
 
     ema_model = AveragedModel(model)

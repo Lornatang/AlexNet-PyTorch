@@ -11,10 +11,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from typing import Any
+
 import torch
 from torch import Tensor
 from torch import nn
 
+
+__all__ = [
+    "AlexNet",
+    "alexnet",
+]
 
 class AlexNet(nn.Module):
     def __init__(self, num_classes: int = 1000, dropout: float = 0.5) -> None:
@@ -61,3 +68,9 @@ class AlexNet(nn.Module):
         out = self.classifier(out)
 
         return out
+
+
+def alexnet(**kwargs: Any) -> AlexNet:
+    model = AlexNet(**kwargs)
+
+    return model
