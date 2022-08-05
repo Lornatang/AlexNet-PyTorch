@@ -31,7 +31,7 @@ This repository contains an op-for-op PyTorch reimplementation of [Photo-Realist
 
 ## Download datasets
 
-Contains MNIST, CIFAR10&CIFAR100, ImageNet_200, ImageNet_1K, Caltech101&Caltech256 and more etc.
+Contains MNIST, CIFAR10&CIFAR100, TinyImageNet_200, MiniImageNet_1K, ImageNet_1K, Caltech101&Caltech256 and more etc.
 
 - [Google Driver]()
 - [Baidu Driver](https://pan.baidu.com/s/1arNM38vhDT7p4jKeD4sqwA?pwd=llot)
@@ -56,7 +56,7 @@ python3 test.py
 
 - line 31: `model_num_classes` change to `1000`.
 - line 33: `mode` change to `train`.
-- line 35: `exp_name` change to `AlexNet-ImageNet`.
+- line 35: `exp_name` change to `AlexNet-ImageNet_1K`.
 - line 47: `pretrained_model_path` change to `./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar`.
 
 ```bash
@@ -67,7 +67,7 @@ python3 train.py
 
 - line 31: `model_num_classes` change to `200`.
 - line 33: `mode` change to `train`.
-- line 35: `exp_name` change to `AlexNet-ImageNet`.
+- line 35: `exp_name` change to `AlexNet-ImageNet_1K`.
 - line 50: `resume` change to `./samples/AlexNet-ImageNet/epoch_xxx.pth.tar`.
 
 ```bash
@@ -98,7 +98,7 @@ Output:
 
 ```text
 Build AlexNet model successfully.
-Load AlexNet model weights `/home/dl/Code/AlexNet-PyTorch/results/pretrained_models/AlexNet-TinyImageNet_1K-da4a75be.pth.tar` successfully.
+Load AlexNet model weights `/home/dl/Code/AlexNet-PyTorch/results/pretrained_models/AlexNet-ImageNet_1K-da4a75be.pth.tar` successfully.
 hammerhead, hammerhead shark                                                (22.57%)
 axolotl, mud puppy, Ambystoma mexicanum                                     (16.57%)
 stingray                                                                    (16.50%)

@@ -28,23 +28,23 @@ cudnn.benchmark = True
 # When evaluating the performance of the SR model, whether to verify only the Y channel image data
 only_test_y_channel = True
 # Model number class
-model_num_classes = 200
+model_num_classes = 1000
 # Current configuration parameter method
-mode = "train"
+mode = "test"
 # Experiment name, easy to save weights and log files
-exp_name = "AlexNet_200-TinyImageNet_200"
+exp_name = "AlexNet-ImageNet_1K"
 
 if mode == "train":
     # Dataset address
-    train_image_dir = "./data/TinyImagenet_200/train"
-    valid_image_dir = "./data/TinyImagenet_200/valid"
+    train_image_dir = "./data/ImageNet_1K/train"
+    valid_image_dir = "./data/ImageNet_1K/valid"
 
     image_size = 224
     batch_size = 128
     num_workers = 4
 
     # The address to load the pretrained model
-    pretrained_model_path = "./results/pretrained_models/AlexNet_200-TinyImageNet_200-da4a75be.pth.tar"
+    pretrained_model_path = "./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar"
 
     # Incremental training and migration training
     resume = ""
@@ -71,11 +71,11 @@ if mode == "train":
 
 if mode == "test":
     # Test data address
-    test_image_dir = "./data/TinyImagenet_200/valid"
+    test_image_dir = "./data/ImageNet_1K/valid"
 
     # Test dataloader parameters
     image_size = 224
     batch_size = 256
     num_workers = 4
 
-    model_path = "./results/pretrained_models/AlexNet_200-TinyImageNet_200-da4a75be.pth.tar"
+    model_path = "./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar"
