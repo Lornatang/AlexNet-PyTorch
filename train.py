@@ -313,7 +313,7 @@ def validate(
             end = time.time()
 
             # Write the data during training to the training log file
-            if batch_index % (batches // 5) == 0:
+            if batch_index % 10 == 0:
                 progress.display(batch_index + 1)
 
             # Preload the next batch of data
