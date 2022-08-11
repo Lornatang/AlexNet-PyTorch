@@ -28,7 +28,7 @@ cudnn.benchmark = True
 # Model number class
 model_num_classes = 1000
 # Current configuration parameter method
-mode = "test"
+mode = "train"
 # Experiment name, easy to save weights and log files
 exp_name = "AlexNet-ImageNet_1K"
 
