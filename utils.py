@@ -11,12 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+import os
+import shutil
 from enum import Enum
 
 import torch
 from torch import nn
-import shutil
-import os
 
 __all__ = [
     "accuracy", "load_state_dict", "make_directory", "save_checkpoint", "Summary", "AverageMeter", "ProgressMeter"

@@ -18,14 +18,14 @@ import torch
 from torch import nn
 from torch import optim
 from torch.cuda import amp
+from torch.optim import lr_scheduler
+from torch.optim.swa_utils import AveragedModel
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 import config
-from dataset import CUDAPrefetcher, ImageDataset
 import model
-from torch.optim.swa_utils import AveragedModel
-from torch.optim import lr_scheduler
+from dataset import CUDAPrefetcher, ImageDataset
 from utils import accuracy, load_state_dict, make_directory, save_checkpoint, Summary, AverageMeter, ProgressMeter
 
 

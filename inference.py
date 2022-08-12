@@ -19,13 +19,12 @@ import cv2
 import torch
 from PIL import Image
 from torch import nn
-from torch.optim.swa_utils import AveragedModel
 from torchvision.transforms import Resize, ConvertImageDtype, Normalize
 
 import config
 import imgproc
-from utils import load_state_dict
 import model
+from utils import load_state_dict
 
 model_names = sorted(
     name for name in model.__dict__ if name.islower() and not name.startswith("__") and callable(model.__dict__[name]))
