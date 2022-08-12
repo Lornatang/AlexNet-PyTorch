@@ -98,7 +98,7 @@ Output:
 
 ```text
 Build AlexNet model successfully.
-Load AlexNet model weights `/home/dl/Code/AlexNet-PyTorch/results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar` successfully.
+Load AlexNet model weights `/AlexNet-PyTorch/results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar` successfully.
 tench, Tinca tinca                                                          (95.73%)
 bolete                                                                      (1.20%)
 triceratops                                                                 (0.43%)
