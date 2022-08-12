@@ -42,8 +42,8 @@ def accuracy(output, target, topk=(1,)):
 
 def load_state_dict(
         model: nn.Module,
-        ema_model: nn.Module,
         model_weights_path: str,
+        ema_model: nn.Module = None,
         start_epoch: int = None,
         best_acc1: float = None,
         optimizer: torch.optim.Optimizer = None,

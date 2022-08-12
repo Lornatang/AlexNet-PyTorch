@@ -22,9 +22,13 @@ from torch import nn
 from torch.optim.swa_utils import AveragedModel
 from torchvision.transforms import Resize, ConvertImageDtype, Normalize
 
+import config
 import imgproc
-from model import alexnet
 from utils import load_state_dict
+import model
+
+model_names = sorted(
+    name for name in model.__dict__ if name.islower() and not name.startswith("__") and callable(model.__dict__[name]))
 
 
 def load_class_label(class_label_file: str, num_classes: int) -> list:
@@ -43,13 +47,11 @@ def choice_device(device_type: str) -> torch.device:
     return device
 
 
-def build_model(model_num_classes: int, device: torch.device) -> [nn.Module, nn.Module]:
-    model = alexnet(num_classes=args.model_num_classes)
-    model = model.to(device=device, memory_format=torch.channels_last)
+def build_model(model_arch_name: str, model_num_classes: int, device: torch.device) -> [nn.Module, nn.Module]:
+    alexnet_model = model.__dict__[model_arch_name](num_classes=model_num_classes)
+    alexnet_model = alexnet_model.to(device=device, memory_format=torch.channels_last)
 
-    ema_model = AveragedModel(model)
-
-    return model, ema_model
+    return alexnet_model
 
 
 def preprocess_image(image_path: str, image_size: int, device: torch.device) -> torch.Tensor:
@@ -83,21 +85,22 @@ def main():
     device = choice_device(args.device_type)
 
     # Initialize the model
-    alexnet, ema_alexnet = build_model(args.model_num_classes, device)
-    print("Build AlexNet model successfully.")
+    alexnet_model = build_model(args.model_arch_name, args.model_num_classes, device)
+    print(f"Build {config.model_arch_name.upper()} model successfully.")
 
     # Load model weights
-    alexnet, _, _, _, _, _ = load_state_dict(alexnet, ema_alexnet, args.model_weights_path)
-    print(f"Load AlexNet model weights `{os.path.abspath(args.model_weights_path)}` successfully.")
+    alexnet_model, _, _, _, _, _ = load_state_dict(alexnet_model, args.model_weights_path)
+    print(f"Load {config.model_arch_name.upper()} "
+          f"model weights `{os.path.abspath(args.model_weights_path)}` successfully.")
 
     # Start the verification mode of the model.
-    alexnet.eval()
+    alexnet_model.eval()
 
     tensor = preprocess_image(args.image_path, args.image_size, device)
 
     # Inference
     with torch.no_grad():
-        output = alexnet(tensor)
+        output = alexnet_model(tensor)
 
     # Calculate the five categories with the highest classification probability
     prediction_class_index = torch.topk(output, k=5).indices.squeeze(0).tolist()
@@ -111,9 +114,11 @@ def main():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--model_arch_name", type=str, default="alexnet")
     parser.add_argument("--class_label_file", type=str, default="./data/ImageNet_1K_labels_map.txt")
     parser.add_argument("--model_num_classes", type=int, default=1000)
-    parser.add_argument("--model_weights_path", type=str, default="./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar")
+    parser.add_argument("--model_weights_path", type=str,
+                        default="./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar")
     parser.add_argument("--image_path", type=str, default="./figure/n01440764_36.JPEG")
     parser.add_argument("--image_size", type=int, default=224)
     parser.add_argument("--device_type", type=str, default="cpu", choices=["cpu", "cuda"])

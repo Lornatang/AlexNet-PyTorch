@@ -23,7 +23,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import config
 from dataset import CUDAPrefetcher, ImageDataset
-from model import alexnet
+import model
 from torch.optim.swa_utils import AveragedModel
 from torch.optim import lr_scheduler
 from utils import accuracy, load_state_dict, make_directory, save_checkpoint, Summary, AverageMeter, ProgressMeter
@@ -39,41 +39,41 @@ def main():
     train_prefetcher, valid_prefetcher = load_dataset()
     print("Load all datasets successfully.")
 
-    model, ema_model = build_model()
-    print("Build AlexNet model successfully.")
+    alexnet_model, ema_alexnet_model = build_model()
+    print(f"Build {config.model_arch_name.upper()} model successfully.")
 
     pixel_criterion = define_loss()
     print("Define all loss functions successfully.")
 
-    optimizer = define_optimizer(model)
+    optimizer = define_optimizer(alexnet_model)
     print("Define all optimizer functions successfully.")
 
     scheduler = define_scheduler(optimizer)
     print("Define all optimizer scheduler functions successfully.")
 
     print("Check whether to load pretrained model weights...")
-    if config.pretrained_model_path:
-        model, ema_model, start_epoch, best_acc1, optimizer, scheduler = load_state_dict(model,
-                                                                                         ema_model,
-                                                                                         config.pretrained_model_path,
-                                                                                         start_epoch,
-                                                                                         best_acc1,
-                                                                                         optimizer,
-                                                                                         scheduler)
-        print(f"Loaded `{config.pretrained_model_path}` pretrained model weights successfully.")
+    if config.pretrained_model_weights_path:
+        alexnet_model, ema_alexnet_model, start_epoch, best_acc1, optimizer, scheduler = load_state_dict(alexnet_model,
+                                                                                                         config.pretrained_model_weights_path,
+                                                                                                         ema_alexnet_model,
+                                                                                                         start_epoch,
+                                                                                                         best_acc1,
+                                                                                                         optimizer,
+                                                                                                         scheduler)
+        print(f"Loaded `{config.pretrained_model_weights_path}` pretrained model weights successfully.")
     else:
         print("Pretrained model weights not found.")
 
     print("Check whether the pretrained model is restored...")
     if config.resume:
-        model, ema_model, start_epoch, best_acc1, optimizer, scheduler = load_state_dict(model,
-                                                                                         ema_model,
-                                                                                         config.pretrained_model_path,
-                                                                                         start_epoch,
-                                                                                         best_acc1,
-                                                                                         optimizer,
-                                                                                         scheduler,
-                                                                                         "resume")
+        alexnet_model, ema_alexnet_model, start_epoch, best_acc1, optimizer, scheduler = load_state_dict(alexnet_model,
+                                                                                                         config.pretrained_model_weights_path,
+                                                                                                         ema_alexnet_model,
+                                                                                                         start_epoch,
+                                                                                                         best_acc1,
+                                                                                                         optimizer,
+                                                                                                         scheduler,
+                                                                                                         "resume")
         print("Loaded pretrained generator model weights.")
     else:
         print("Resume training model not found. Start training from scratch.")
@@ -91,8 +91,8 @@ def main():
     scaler = amp.GradScaler()
 
     for epoch in range(start_epoch, config.epochs):
-        train(model, ema_model, train_prefetcher, pixel_criterion, optimizer, epoch, scaler, writer)
-        acc1 = validate(ema_model, valid_prefetcher, epoch, writer, "Valid")
+        train(alexnet_model, ema_alexnet_model, train_prefetcher, pixel_criterion, optimizer, epoch, scaler, writer)
+        acc1 = validate(ema_alexnet_model, valid_prefetcher, epoch, writer, "Valid")
         print("\n")
 
         # Update LR
@@ -104,8 +104,8 @@ def main():
         best_acc1 = max(acc1, best_acc1)
         save_checkpoint({"epoch": epoch + 1,
                          "best_acc1": best_acc1,
-                         "state_dict": model.state_dict(),
-                         "ema_state_dict": ema_model.state_dict(),
+                         "state_dict": alexnet_model.state_dict(),
+                         "ema_state_dict": ema_alexnet_model.state_dict(),
                          "optimizer": optimizer.state_dict(),
                          "scheduler": scheduler.state_dict()},
                         f"epoch_{epoch + 1}.pth.tar",
@@ -144,13 +144,13 @@ def load_dataset() -> [CUDAPrefetcher, CUDAPrefetcher]:
 
 
 def build_model() -> [nn.Module, nn.Module]:
-    model = alexnet(num_classes=config.model_num_classes)
-    model = model.to(device=config.device, memory_format=torch.channels_last)
+    alexnet_model = model.__dict__[config.model_arch_name](num_classes=config.model_num_classes)
+    alexnet_model = alexnet_model.to(device=config.device, memory_format=torch.channels_last)
 
     ema_avg = lambda averaged_model_parameter, model_parameter, num_averaged: (1 - config.model_ema_decay) * averaged_model_parameter + config.model_ema_decay * model_parameter
-    ema_model = AveragedModel(model, avg_fn=ema_avg)
+    ema_alexnet_model = AveragedModel(alexnet_model, avg_fn=ema_avg)
 
-    return model, ema_model
+    return alexnet_model, ema_alexnet_model
 
 
 def define_loss() -> nn.CrossEntropyLoss:
@@ -179,7 +179,7 @@ def define_scheduler(optimizer: optim.SGD) -> lr_scheduler.CosineAnnealingWarmRe
 
 
 def train(
-        model: nn.Module,
+        alexnet_model: nn.Module,
         ema_model: nn.Module,
         train_prefetcher: CUDAPrefetcher,
         criterion: nn.CrossEntropyLoss,
@@ -201,7 +201,7 @@ def train(
                              prefix=f"Epoch: [{epoch + 1}]")
 
     # Put the generative network model in training mode
-    model.train()
+    alexnet_model.train()
 
     # Initialize the number of data batches to print logs on the terminal
     batch_index = 0
@@ -225,11 +225,11 @@ def train(
         batch_size = images.size(0)
 
         # Initialize generator gradients
-        model.zero_grad(set_to_none=True)
+        alexnet_model.zero_grad(set_to_none=True)
 
         # Mixed precision training
         with amp.autocast():
-            output = model(images)
+            output = alexnet_model(images)
             loss = criterion(output, target)
 
         # Backpropagation
@@ -239,20 +239,20 @@ def train(
         scaler.update()
 
         # Update EMA
-        ema_model.update_parameters(model)
+        ema_model.update_parameters(alexnet_model)
 
         # measure accuracy and record loss
         top1, top5 = accuracy(output, target, topk=(1, 5))
         losses.update(loss.item(), batch_size)
-        acc1.update(top1[0], batch_size)
-        acc5.update(top5[0], batch_size)
+        acc1.update(top1[0].item(), batch_size)
+        acc5.update(top5[0].item(), batch_size)
 
         # Calculate the time it takes to fully train a batch of data
         batch_time.update(time.time() - end)
         end = time.time()
 
         # Write the data during training to the training log file
-        if batch_index % config.print_frequency == 0:
+        if batch_index % config.train_print_frequency == 0:
             # Record loss during training and output to file
             writer.add_scalar("Train/Loss", loss.item(), batch_index + epoch * batches + 1)
             progress.display(batch_index + 1)
@@ -260,12 +260,12 @@ def train(
         # Preload the next batch of data
         batch_data = train_prefetcher.next()
 
-        # After training a batch of data, add 1 to the number of data batches to ensure that the terminal prints data normally
+        # Add 1 to the number of data batches to ensure that the terminal prints data normally
         batch_index += 1
 
 
 def validate(
-        ema_model: nn.Module,
+        ema_alexnet_model: nn.Module,
         data_prefetcher: CUDAPrefetcher,
         epoch: int,
         writer: SummaryWriter,
@@ -279,7 +279,7 @@ def validate(
     progress = ProgressMeter(batches, [batch_time, acc1, acc5], prefix=f"{mode}: ")
 
     # Put the exponential moving average model in the verification mode
-    ema_model.eval()
+    ema_alexnet_model.eval()
 
     # Initialize the number of data batches to print logs on the terminal
     batch_index = 0
@@ -301,25 +301,25 @@ def validate(
             batch_size = images.size(0)
 
             # Inference
-            output = ema_model(images)
+            output = ema_alexnet_model(images)
 
             # measure accuracy and record loss
             top1, top5 = accuracy(output, target, topk=(1, 5))
-            acc1.update(top1[0], batch_size)
-            acc5.update(top5[0], batch_size)
+            acc1.update(top1[0].item(), batch_size)
+            acc5.update(top5[0].item(), batch_size)
 
             # Calculate the time it takes to fully train a batch of data
             batch_time.update(time.time() - end)
             end = time.time()
 
             # Write the data during training to the training log file
-            if batch_index % 10 == 0:
+            if batch_index % config.valid_print_frequency == 0:
                 progress.display(batch_index + 1)
 
             # Preload the next batch of data
             batch_data = data_prefetcher.next()
 
-            # After training a batch of data, add 1 to the number of data batches to ensure that the terminal prints data normally
+            # Add 1 to the number of data batches to ensure that the terminal prints data normally
             batch_index += 1
 
     # print metrics
