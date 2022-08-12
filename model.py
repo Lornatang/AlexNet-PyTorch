@@ -17,11 +17,11 @@ import torch
 from torch import Tensor
 from torch import nn
 
-
 __all__ = [
     "AlexNet",
     "alexnet",
 ]
+
 
 class AlexNet(nn.Module):
     def __init__(self, num_classes: int = 1000) -> None:
