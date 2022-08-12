@@ -16,23 +16,19 @@ import time
 
 import torch
 from torch import nn
-from torch.optim.swa_utils import AveragedModel
 from torch.utils.data import DataLoader
 
 import config
+import model
 from dataset import CUDAPrefetcher, ImageDataset
-from model import alexnet
 from utils import load_state_dict, accuracy, Summary, AverageMeter, ProgressMeter
 
 
-def build_model() -> [nn.Module, nn.Module]:
-    model = alexnet(num_classes=config.model_num_classes)
-    model = model.to(device=config.device, memory_format=torch.channels_last)
+def build_model() -> nn.Module:
+    alexnet_model = model.__dict__[config.model_arch_name](num_classes=config.model_num_classes)
+    alexnet_model = alexnet_model.to(device=config.device, memory_format=torch.channels_last)
 
-    ema_avg = lambda averaged_model_parameter, model_parameter, num_averaged: (1 - config.model_ema_decay) * averaged_model_parameter + config.model_ema_decay * model_parameter
-    ema_model = AveragedModel(model, avg_fn=ema_avg)
-
-    return model, ema_model
+    return alexnet_model
 
 
 def load_dataset() -> CUDAPrefetcher:
@@ -53,15 +49,16 @@ def load_dataset() -> CUDAPrefetcher:
 
 def main() -> None:
     # Initialize the model
-    model, ema_model = build_model()
-    print("Build AlexNet model successfully.")
+    alexnet_model = build_model()
+    print(f"Build {config.model_arch_name.upper()} model successfully.")
 
     # Load model weights
-    model, _, _, _, _, _ = load_state_dict(model, ema_model, config.model_path)
-    print(f"Load AlexNet model weights `{os.path.abspath(config.model_path)}` successfully.")
+    alexnet_model, _, _, _, _, _ = load_state_dict(alexnet_model, config.model_weights_path)
+    print(f"Load {config.model_arch_name.upper()} "
+          f"model weights `{os.path.abspath(config.model_weights_path)}` successfully.")
 
     # Start the verification mode of the model.
-    model.eval()
+    alexnet_model.eval()
 
     # Load test dataloader
     test_prefetcher = load_dataset()
@@ -93,25 +90,25 @@ def main() -> None:
             batch_size = images.size(0)
 
             # Inference
-            output = model(images)
+            output = alexnet_model(images)
 
             # measure accuracy and record loss
             top1, top5 = accuracy(output, target, topk=(1, 5))
-            acc1.update(top1[0], batch_size)
-            acc5.update(top5[0], batch_size)
+            acc1.update(top1[0].item(), batch_size)
+            acc5.update(top5[0].item(), batch_size)
 
             # Calculate the time it takes to fully train a batch of data
             batch_time.update(time.time() - end)
             end = time.time()
 
             # Write the data during training to the training log file
-            if batch_index % 10 == 0:
+            if batch_index % config.test_print_frequency == 0:
                 progress.display(batch_index + 1)
 
             # Preload the next batch of data
             batch_data = test_prefetcher.next()
 
-            # After training a batch of data, add 1 to the number of data batches to ensure that the terminal prints data normally
+            # Add 1 to the number of data batches to ensure that the terminal prints data normally
             batch_index += 1
 
     # print metrics

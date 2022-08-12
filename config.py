@@ -25,12 +25,14 @@ np.random.seed(0)
 device = torch.device("cuda", 0)
 # Turning on when the image size does not change during training can speed up training
 cudnn.benchmark = True
+# Model arch name
+model_arch_name = "alexnet"
 # Model number class
 model_num_classes = 1000
 # Current configuration parameter method
 mode = "train"
 # Experiment name, easy to save weights and log files
-exp_name = "AlexNet-ImageNet_1K"
+exp_name = f"{model_arch_name.upper()}-ImageNet_1K"
 
 if mode == "train":
     # Dataset address
@@ -42,7 +44,7 @@ if mode == "train":
     num_workers = 4
 
     # The address to load the pretrained model
-    pretrained_model_path = "./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar"
+    pretrained_model_weights_path = "./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar"
 
     # Incremental training and migration training
     resume = ""
@@ -64,8 +66,9 @@ if mode == "train":
     lr_scheduler_T_mult = 1
     lr_scheduler_eta_min = 5e-5
 
-    # How many iterations to print the training result
-    print_frequency = 200
+    # How many iterations to print the training/validate result
+    train_print_frequency = 200
+    valid_print_frequency = 20
 
 if mode == "test":
     # Test data address
@@ -76,4 +79,7 @@ if mode == "test":
     batch_size = 256
     num_workers = 4
 
-    model_path = "./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar"
+    # How many iterations to print the testing result
+    test_print_frequency = 20
+
+    model_weights_path = "./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar"
