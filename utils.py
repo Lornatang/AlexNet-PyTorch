@@ -23,46 +23,46 @@ __all__ = [
 ]
 
 
-def accuracy(output, target, topk=(1,)):
+def accuracy(output, target, topk=(1,)): ## undefined
     """Computes the accuracy over the k top predictions for the specified values of k"""
-    with torch.no_grad():
-        maxk = max(topk)
-        batch_size = target.size(0)
+    with torch.no_grad(): ## undefined
+        maxk = max(topk) ## undefined
+        batch_size = target.size(0) ## undefined
 
-        _, pred = output.topk(maxk, 1, True, True)
-        pred = pred.t()
-        correct = pred.eq(target.view(1, -1).expand_as(pred))
+        _, pred = output.topk(maxk, 1, True, True) ## undefined
+        pred = pred.t() ## undefined
+        correct = pred.eq(target.view(1, -1).expand_as(pred)) ## undefined
 
-        results = []
-        for k in topk:
-            correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True)
-            results.append(correct_k.mul_(100.0 / batch_size))
-        return results
+        results = [] ## undefined
+        for k in topk: ## undefined
+            correct_k = correct[:k].reshape(-1).float().sum(0, keepdim=True) ## undefined
+            results.append(correct_k.mul_(100.0 / batch_size)) ## undefined
+        return results ## undefined
 
 
-def load_state_dict(
-        model: nn.Module,
-        model_weights_path: str,
-        ema_model: nn.Module = None,
-        start_epoch: int = None,
-        best_acc1: float = None,
-        optimizer: torch.optim.Optimizer = None,
-        scheduler: torch.optim.lr_scheduler = None,
+def load_state_dict( ## undefined
+        model: nn.Module, ## undefined
+        model_weights_path: str, ## undefined
+        ema_model: nn.Module = None, ## undefined
+        start_epoch: int = None, ## undefined
+        best_acc1: float = None, ## undefined
+        optimizer: torch.optim.Optimizer = None, ## undefined
+        scheduler: torch.optim.lr_scheduler = None, ## undefined
         load_mode: str = None,
-) -> [nn.Module, nn.Module, str, int, float, torch.optim.Optimizer, torch.optim.lr_scheduler]:
+) -> [nn.Module, nn.Module, str, int, float, torch.optim.Optimizer, torch.optim.lr_scheduler]: ## undefined
     # Load model weights
-    checkpoint = torch.load(model_weights_path, map_location=lambda storage, loc: storage)
+    checkpoint = torch.load(model_weights_path, map_location=lambda storage, loc: storage) ## undefined
 
-    if load_mode == "resume":
+    if load_mode == "resume": ## undefined
         # Restore the parameters in the training node to this point
         start_epoch = checkpoint["epoch"]
         best_acc1 = checkpoint["best_acc1"]
         # Load model state dict. Extract the fitted model weights
-        model_state_dict = model.state_dict()
-        state_dict = {k: v for k, v in checkpoint["state_dict"].items() if k in model_state_dict.keys()}
+        model_state_dict = model.state_dict() ## undefined
+        state_dict = {k: v for k, v in checkpoint["state_dict"].items() if k in model_state_dict.keys()} ## undefined
         # Overwrite the model weights to the current model (base model)
-        model_state_dict.update(state_dict)
-        model.load_state_dict(model_state_dict)
+        model_state_dict.update(state_dict) ## undefined
+        model.load_state_dict(model_state_dict) ## undefined
         # Load ema model state dict. Extract the fitted model weights
         ema_model_state_dict = ema_model.state_dict()
         ema_state_dict = {k: v for k, v in checkpoint["ema_state_dict"].items() if k in ema_model_state_dict.keys()}
@@ -75,12 +75,12 @@ def load_state_dict(
         scheduler.load_state_dict(checkpoint["scheduler"])
     else:
         # Load model state dict. Extract the fitted model weights
-        model_state_dict = model.state_dict()
-        state_dict = {k: v for k, v in checkpoint["state_dict"].items() if
-                      k in model_state_dict.keys() and v.size() == model_state_dict[k].size()}
+        model_state_dict = model.state_dict() ## undefined
+        state_dict = {k: v for k, v in checkpoint["state_dict"].items() if ## undefined
+                      k in model_state_dict.keys() and v.size() == model_state_dict[k].size()} ## undefined
         # Overwrite the model weights to the current model
-        model_state_dict.update(state_dict)
-        model.load_state_dict(model_state_dict)
+        model_state_dict.update(state_dict) ## undefined
+        model.load_state_dict(model_state_dict) ## undefined
 
     return model, ema_model, start_epoch, best_acc1, optimizer, scheduler
 
@@ -90,7 +90,7 @@ def make_directory(dir_path: str) -> None:
         os.makedirs(dir_path)
 
 
-def save_checkpoint(
+def save_checkpoint( ## undefined
         state_dict: dict,
         file_name: str,
         samples_dir: str,
@@ -98,13 +98,13 @@ def save_checkpoint(
         is_best: bool = False,
         is_last: bool = False,
 ) -> None:
-    checkpoint_path = os.path.join(samples_dir, file_name)
-    torch.save(state_dict, checkpoint_path)
+    checkpoint_path = os.path.join(samples_dir, file_name) ## undefined
+    torch.save(state_dict, checkpoint_path) ## undefined
 
-    if is_best:
-        shutil.copyfile(checkpoint_path, os.path.join(results_dir, "best.pth.tar"))
+    if is_best: ## undefined
+        shutil.copyfile(checkpoint_path, os.path.join(results_dir, "best.pth.tar")) ## undefined
     if is_last:
-        shutil.copyfile(checkpoint_path, os.path.join(results_dir, "last.pth.tar"))
+        shutil.copyfile(checkpoint_path, os.path.join(results_dir, "last.pth.tar")) ## undefined
 
 
 class Summary(Enum):
@@ -114,24 +114,24 @@ class Summary(Enum):
     COUNT = 3
 
 
-class AverageMeter(object):
-    def __init__(self, name, fmt=":f", summary_type=Summary.AVERAGE):
-        self.name = name
-        self.fmt = fmt
-        self.summary_type = summary_type
-        self.reset()
+class AverageMeter(object): ## undefined
+    def __init__(self, name, fmt=":f", summary_type=Summary.AVERAGE): ## undefined
+        self.name = name ## undefined
+        self.fmt = fmt ## undefined
+        self.summary_type = summary_type ## undefined
+        self.reset() ## undefined
 
-    def reset(self):
+    def reset(self): ## undefined
         self.val = 0
         self.avg = 0
         self.sum = 0
         self.count = 0
 
-    def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count
+    def update(self, val, n=1): ## undefined
+        self.val = val ## undefined
+        self.sum += val * n ## undefined
+        self.count += n ## undefined
+        self.avg = self.sum / self.count ## undefined
 
     def __str__(self):
         fmtstr = "{name} {val" + self.fmt + "} ({avg" + self.fmt + "})"
@@ -152,23 +152,23 @@ class AverageMeter(object):
         return fmtstr.format(**self.__dict__)
 
 
-class ProgressMeter(object):
-    def __init__(self, num_batches, meters, prefix=""):
-        self.batch_fmtstr = self._get_batch_fmtstr(num_batches)
+class ProgressMeter(object): ## undefined
+    def __init__(self, num_batches, meters, prefix=""): ## undefined
+        self.batch_fmtstr = self._get_batch_fmtstr(num_batches) ## undefined
         self.meters = meters
         self.prefix = prefix
 
-    def display(self, batch):
-        entries = [self.prefix + self.batch_fmtstr.format(batch)]
-        entries += [str(meter) for meter in self.meters]
+    def display(self, batch): ## undefined
+        entries = [self.prefix + self.batch_fmtstr.format(batch)] ## undefined
+        entries += [str(meter) for meter in self.meters] ## undefined
         print("\t".join(entries))
 
-    def display_summary(self):
-        entries = [" *"]
-        entries += [meter.summary() for meter in self.meters]
-        print(" ".join(entries))
+    def display_summary(self): ## undefined
+        entries = [" *"] ## undefined
+        entries += [meter.summary() for meter in self.meters] ## undefined
+        print(" ".join(entries)) ## undefined
 
-    def _get_batch_fmtstr(self, num_batches):
-        num_digits = len(str(num_batches // 1))
-        fmt = "{:" + str(num_digits) + "d}"
-        return "[" + fmt + "/" + fmt.format(num_batches) + "]"
+    def _get_batch_fmtstr(self, num_batches): ## undefined
+        num_digits = len(str(num_batches // 1)) ## undefined
+        fmt = "{:" + str(num_digits) + "d}" ## undefined
+        return "[" + fmt + "/" + fmt.format(num_batches) + "]" ## undefined

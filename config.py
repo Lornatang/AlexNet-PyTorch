@@ -34,14 +34,14 @@ mode = "train"
 # Experiment name, easy to save weights and log files
 exp_name = f"{model_arch_name.upper()}-ImageNet_1K"
 
-if mode == "train":
+if mode == "train": ## undefined
     # Dataset address
-    train_image_dir = "./data/ImageNet_1K/ILSVRC2012_img_train"
-    valid_image_dir = "./data/ImageNet_1K/ILSVRC2012_img_val"
+    train_image_dir = "./data/ImageNet_1K/ILSVRC2012_img_train" ## undefined
+    valid_image_dir = "./data/ImageNet_1K/ILSVRC2012_img_val" ## undefined
 
-    image_size = 224
-    batch_size = 128
-    num_workers = 4
+    image_size = 224 ## undefined
+    batch_size = 128 ## undefined
+    num_workers = 4 ## undefined
 
     # The address to load the pretrained model
     pretrained_model_weights_path = "./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar"
@@ -50,10 +50,10 @@ if mode == "train":
     resume = ""
 
     # Total num epochs
-    epochs = 600
-
+    epochs = 600 ## undefined
+ 
     # Loss parameters
-    loss_label_smoothing = 0.1
+    loss_label_smoothing = 0.1 ## undefined
 
     # Optimizer parameter
     model_lr = 0.5
@@ -62,24 +62,24 @@ if mode == "train":
     model_ema_decay = 0.99998
 
     # Learning rate scheduler parameter
-    lr_scheduler_T_0 = epochs // 4
-    lr_scheduler_T_mult = 1
-    lr_scheduler_eta_min = 5e-5
+    lr_scheduler_T_0 = epochs // 4 ## undefined
+    lr_scheduler_T_mult = 1 ## undefined
+    lr_scheduler_eta_min = 5e-5 ## undefined
 
     # How many iterations to print the training/validate result
-    train_print_frequency = 200
-    valid_print_frequency = 20
+    train_print_frequency = 200 ## undefined
+    valid_print_frequency = 20 ## undefined
 
 if mode == "test":
     # Test data address
     test_image_dir = "./data/ImageNet_1K/ILSVRC2012_img_val"
 
     # Test dataloader parameters
-    image_size = 224
-    batch_size = 256
-    num_workers = 4
+    image_size = 224 ## undefined
+    batch_size = 256 ## undefined
+    num_workers = 4 ## undefined
 
     # How many iterations to print the testing result
-    test_print_frequency = 20
+    test_print_frequency = 20 ## undefined
 
     model_weights_path = "./results/pretrained_models/AlexNet-ImageNet_1K-9df8cd0f.pth.tar"
