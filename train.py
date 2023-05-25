@@ -201,21 +201,21 @@ def train( ## Method to start the training process
                              prefix=f"Epoch: [{epoch + 1}]") ## undefined
 
     # Put the generative network model in training mode
-    alexnet_model.train() ## undefined
+    alexnet_model.train() ## Place the model into training mode
 
     # Initialize the number of data batches to print logs on the terminal
-    batch_index = 0 ## undefined
+    batch_index = 0 ## Initialize batch index to keep track of current batch
 
     # Initialize the data loader and load the first batch of data
-    train_prefetcher.reset() ## undefined
-    batch_data = train_prefetcher.next() ## undefined
+    train_prefetcher.reset() ## Reset the prefetcher to start training data from the beginning
+    batch_data = train_prefetcher.next() ## Loads the first batch of data using the train prefetcher
 
     # Get the initialization training time
-    end = time.time() ## undefined
+    end = time.time() ## Records the current time as starting from the first batch
 
-    while batch_data is not None: ## undefined
+    while batch_data is not None: ## If the images from the batch are not loaded
         # Calculate the time it takes to load a batch of data
-        data_time.update(time.time() - end) ## undefined
+        data_time.update(time.time() - end) ## Updates the value of the average class for time with the time taken to load the batch
 
         # Transfer in-memory data to CUDA devices to speed up training
         images = batch_data["image"].to(device=config.device, memory_format=torch.channels_last, non_blocking=True) ## undefined
@@ -282,29 +282,29 @@ def validate(
     ema_alexnet_model.eval() ## undefined
 
     # Initialize the number of data batches to print logs on the terminal
-    batch_index = 0 ## undefined
+    batch_index = 0 ## Sets the starting batch index to 0
 
     # Initialize the data loader and load the first batch of data
-    data_prefetcher.reset() ## undefined
+    data_prefetcher.reset() ## Reset the values of the data prefetcher
     batch_data = data_prefetcher.next()
 
     # Get the initialization test time
     end = time.time()
 
-    with torch.no_grad(): ## undefined
-        while batch_data is not None: ## undefined
+    with torch.no_grad(): ## Disables gradient calculation to improve performance
+        while batch_data is not None: ## Ensure loop is going while there is still data in the prefetcher
             # Transfer in-memory data to CUDA devices to speed up training
             images = batch_data["image"].to(device=config.device, memory_format=torch.channels_last, non_blocking=True) ## undefined
             target = batch_data["target"].to(device=config.device, non_blocking=True) ## undefined
 
             # Get batch size
-            batch_size = images.size(0) ## undefined
+            batch_size = images.size(0) ## Sets the batch_size as the first dimension of the images tensor
 
             # Inference
             output = ema_alexnet_model(images) ## undefined
 
             # measure accuracy and record loss
-            top1, top5 = accuracy(output, target, topk=(1, 5)) ## undefined
+            top1, top5 = accuracy(output, target, topk=(1, 5)) ## Sets the values of the top1 and top5 as the results of the accuracies
             acc1.update(top1[0].item(), batch_size) ## undefined
             acc5.update(top5[0].item(), batch_size) ## undefined
 
@@ -323,9 +323,9 @@ def validate(
             batch_index += 1 ## undefined
 
     # print metrics
-    progress.display_summary() ## undefined
+    progress.display_summary() ## Prints the summary of the current iteration
 
-    if mode == "Valid" or mode == "Test": ## undefined
+    if mode == "Valid" or mode == "Test": ## Checks the mode
         writer.add_scalar(f"{mode}/Acc@1", acc1.avg, epoch + 1) ## undefined
     else:
         raise ValueError("Unsupported mode, please use `Valid` or `Test`.") ## Throws error for invalid mode
