@@ -16,25 +16,25 @@ import time
 
 import torch
 from torch import nn
-from torch import optim ## undefined
-from torch.cuda import amp ## undefined
-from torch.optim import lr_scheduler ## undefined
-from torch.optim.swa_utils import AveragedModel ## undefined
-from torch.utils.data import DataLoader ## undefined
-from torch.utils.tensorboard import SummaryWriter ## undefined
+from torch import optim ## Import optim module from torch library
+from torch.cuda import amp ## Import amp module from torch library 
+from torch.optim import lr_scheduler ## Import lr_scheduler module from torch library
+from torch.optim.swa_utils import AveragedModel ## Import AveragedModel module from torch library
+from torch.utils.data import DataLoader ## Import DataLoader module from torch library
+from torch.utils.tensorboard import SummaryWriter ## Import SummaryWriter module from torch library
 
 import config
 import model
-from dataset import CUDAPrefetcher, ImageDataset ## undefined
+from dataset import CUDAPrefetcher, ImageDataset ## Import the modules from dataset.py file
 from utils import accuracy, load_state_dict, make_directory, save_checkpoint, Summary, AverageMeter, ProgressMeter
 
 
 def main():
     # Initialize the number of training epochs
-    start_epoch = 0 ## undefined
+    start_epoch = 0 ## The training should start from epoch 0
 
     # Initialize training network evaluation indicators
-    best_acc1 = 0.0 ## undefined
+    best_acc1 = 0.0 ## Keeps count of the current best accuracy, initialized with base value of 0
 
     train_prefetcher, valid_prefetcher = load_dataset()
     print("Load all datasets successfully.") 
@@ -115,20 +115,20 @@ def main():
                         is_last)
 
 
-def load_dataset() -> [CUDAPrefetcher, CUDAPrefetcher]: ## undefined
+def load_dataset() -> [CUDAPrefetcher, CUDAPrefetcher]: ## Method used to load the images into memory
     # Load train, test and valid datasets
-    train_dataset = ImageDataset(config.train_image_dir, config.image_size, "Train") ## undefined
-    valid_dataset = ImageDataset(config.valid_image_dir, config.image_size, "Valid") ## undefined
+    train_dataset = ImageDataset(config.train_image_dir, config.image_size, "Train") ## Variable used to locate the training set images
+    valid_dataset = ImageDataset(config.valid_image_dir, config.image_size, "Valid") ## Variable used to locate the validation set images
 
     # Generator all dataloader
-    train_dataloader = DataLoader(train_dataset, ## undefined
-                                  batch_size=config.batch_size, ## undefined
-                                  shuffle=True, ## undefined
-                                  num_workers=config.num_workers, ## undefined
-                                  pin_memory=True, ## undefined
-                                  drop_last=True, ## undefined
-                                  persistent_workers=True) ## undefined
-    valid_dataloader = DataLoader(valid_dataset, ## undefined
+    train_dataloader = DataLoader(train_dataset, ## Training set location given as parameter to the data loader
+                                  batch_size=config.batch_size, ## Set the loading batch size as the one declared in config.py
+                                  shuffle=True, ## Load images in a randomized order
+                                  num_workers=config.num_workers, ## Number of subprocesses used for loading data
+                                  pin_memory=True, ## CUDA specific parameter the allow data transfer between CPU and GPU to be faster
+                                  drop_last=True, ## Drop incomplete batches (batch size does not match predefined batch size)
+                                  persistent_workers=True) ## Batch processing threads are persisted through the epochs
+    valid_dataloader = DataLoader(valid_dataset, ## Validation set location gives as parameter to the data loader
                                   batch_size=config.batch_size,
                                   shuffle=False,
                                   num_workers=config.num_workers,
@@ -137,10 +137,10 @@ def load_dataset() -> [CUDAPrefetcher, CUDAPrefetcher]: ## undefined
                                   persistent_workers=True)
 
     # Place all data on the preprocessing data loader
-    train_prefetcher = CUDAPrefetcher(train_dataloader, config.device) ## undefined
-    valid_prefetcher = CUDAPrefetcher(valid_dataloader, config.device) ## undefined
+    train_prefetcher = CUDAPrefetcher(train_dataloader, config.device) ## Initialize the cuda prefetcher for the training set
+    valid_prefetcher = CUDAPrefetcher(valid_dataloader, config.device) ## Initialize the cuda prefetcher for the validation set
 
-    return train_prefetcher, valid_prefetcher ## undefined
+    return train_prefetcher, valid_prefetcher ## Returns the prefetchers
 
 
 def build_model() -> [nn.Module, nn.Module]:
@@ -178,24 +178,24 @@ def define_scheduler(optimizer: optim.SGD) -> lr_scheduler.CosineAnnealingWarmRe
     return scheduler
 
 
-def train( ## undefined
-        alexnet_model: nn.Module, ## undefined
-        ema_model: nn.Module, ## undefined
-        train_prefetcher: CUDAPrefetcher, ## undefined
+def train( ## Method to start the training process
+        alexnet_model: nn.Module, ## The model to be trained
+        ema_model: nn.Module, ## EMA(Exponential Moving Average) used to update the model's parameters
+        train_prefetcher: CUDAPrefetcher, ## Used for preloading and prefetching batches of training data
         criterion: nn.CrossEntropyLoss, ## undefined
-        optimizer: optim.Adam, ## undefined
-        epoch: int, ## undefined
+        optimizer: optim.Adam, ## Optimizer that updates the parameters of the model's predictions
+        epoch: int, ## Current epoch
         scaler: amp.GradScaler, ## undefined
-        writer: SummaryWriter ## undefined
+        writer: SummaryWriter ## Used for logging and visualization during training
 ) -> None:
     # Calculate how many batches of data are in each Epoch
-    batches = len(train_prefetcher) ## undefined
+    batches = len(train_prefetcher) ## Represent the number of batches processed in the current epoch
     # Print information of progress bar during training
-    batch_time = AverageMeter("Time", ":6.3f") ## undefined
-    data_time = AverageMeter("Data", ":6.3f") ## undefined
-    losses = AverageMeter("Loss", ":6.6f") ## undefined
-    acc1 = AverageMeter("Acc@1", ":6.2f") ## undefined
-    acc5 = AverageMeter("Acc@5", ":6.2f") ## undefined
+    batch_time = AverageMeter("Time", ":6.3f") ## Creates an instance of the AverageMeter class with label Time and the values held to be displayed as 6 characters total, 3 characters for decimal
+    data_time = AverageMeter("Data", ":6.3f") ## Creates an instance of the AverageMeter class with label Data and the values held to be displayed as 6 characters total, 3 characters for decimal
+    losses = AverageMeter("Loss", ":6.6f") ## Creates an instance of the AverageMeter class with label Loss and the values held to be displayed as 6 characters total, 6 characters for decimal
+    acc1 = AverageMeter("Acc@1", ":6.2f") ## Creates an instance of the AverageMeter class with label Acc@1 and the values held to be displayed as 6 characters total, 2 characters for decimal
+    acc5 = AverageMeter("Acc@5", ":6.2f") ## Creates an instance of the AverageMeter class with label Acc@5 and the values held to be displayed as 6 characters total, 2 characters for decimal
     progress = ProgressMeter(batches, ## undefined
                              [batch_time, data_time, losses, acc1, acc5], ## undefined
                              prefix=f"Epoch: [{epoch + 1}]") ## undefined
@@ -222,7 +222,7 @@ def train( ## undefined
         target = batch_data["target"].to(device=config.device, non_blocking=True) ## undefined
 
         # Get batch size
-        batch_size = images.size(0) ## undefined
+        batch_size = images.size(0) ## Initializez the batch size with the first dimension of the images sensor
 
         # Initialize generator gradients
         alexnet_model.zero_grad(set_to_none=True) ## undefined
@@ -328,10 +328,10 @@ def validate(
     if mode == "Valid" or mode == "Test": ## undefined
         writer.add_scalar(f"{mode}/Acc@1", acc1.avg, epoch + 1) ## undefined
     else:
-        raise ValueError("Unsupported mode, please use `Valid` or `Test`.") ## undefined
+        raise ValueError("Unsupported mode, please use `Valid` or `Test`.") ## Throws error for invalid mode
 
     return acc1.avg ## undefined
 
 
-if __name__ == "__main__": ## undefined
+if __name__ == "__main__": ## This is to make sure that the main function is executed only when the script is ran directly and not imported as a module into another script
     main()
